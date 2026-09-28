@@ -1,0 +1,32 @@
+[
+ {
+  "roster_id": 1,
+  "matchup_id": 1,
+  "points": 130,
+  "custom_points": null
+ },
+ {
+  "roster_id": 2,
+  "matchup_id": 1,
+  "points": 120,
+  "custom_points": null
+ },
+ {
+  "roster_id": 3,
+  "matchup_id": 2,
+  "points": 60,
+  "custom_points": null
+ },
+ {
+  "roster_id": 4,
+  "matchup_id": 2,
+  "points": 65,
+  "custom_points": null
+ },
+ {
+  "roster_id": 5,
+  "matchup_id": null,
+  "points": 0,
+  "custom_points": null
+ }
+]
