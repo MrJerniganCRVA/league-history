@@ -1,0 +1,18 @@
+[
+ {
+  "user_id": "u1",
+  "display_name": "Alice"
+ },
+ {
+  "user_id": "u2",
+  "display_name": "Bob"
+ },
+ {
+  "user_id": "u3",
+  "display_name": "Carl"
+ },
+ {
+  "user_id": "u4",
+  "display_name": "Dana"
+ }
+]

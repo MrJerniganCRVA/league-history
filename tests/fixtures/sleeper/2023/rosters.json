@@ -1,0 +1,21 @@
+[
+ {
+  "roster_id": 1,
+  "owner_id": "u1"
+ },
+ {
+  "roster_id": 2,
+  "owner_id": "u2"
+ },
+ {
+  "roster_id": 3,
+  "owner_id": null,
+  "co_owners": [
+   "u3"
+  ]
+ },
+ {
+  "roster_id": 4,
+  "owner_id": "u4"
+ }
+]

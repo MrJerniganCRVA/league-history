@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# League history: secrets and local env
+.env
+*token*.json
+.venv/

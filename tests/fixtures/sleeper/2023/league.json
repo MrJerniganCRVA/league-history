@@ -1,0 +1,11 @@
+{
+ "league_id": "L2023",
+ "previous_league_id": null,
+ "season": "2023",
+ "status": "complete",
+ "settings": {
+  "playoff_week_start": 3,
+  "playoff_teams": 2,
+  "playoff_round_type": 0
+ }
+}
