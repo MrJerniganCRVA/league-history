@@ -67,6 +67,7 @@ class Resolver:
         self.managers = managers
         self.display = {m["manager_id"]: m.get("display_name", m["manager_id"]) for m in managers}
         self.sleeper: dict[str, str] = {}
+        self.sleeper_name: dict[str, str] = {}
         self.yahoo_guid: dict[str, str] = {}
         self.yahoo_season_name: dict[tuple[str, str], str] = {}
         self.yahoo_fallback: dict[str, str] = {}
@@ -74,6 +75,8 @@ class Resolver:
             mid = m["manager_id"]
             for uid in m.get("sleeper_user_ids", []) or []:
                 self.sleeper[str(uid)] = mid
+            for name in m.get("sleeper_names", []) or []:
+                self.sleeper_name[norm_name(name)] = mid
             for guid in m.get("yahoo_manager_guids", []) or []:
                 self.yahoo_guid[str(guid)] = mid
             for season, name in (m.get("yahoo_team_names_by_season") or {}).items():
@@ -84,9 +87,12 @@ class Resolver:
         self.unmapped: dict[str, str] = {}
 
     def sleeper_user(self, user_id: str | None, label: str = "") -> str:
+        """Match by user_id first, then by Sleeper username/display_name (label)."""
         uid = str(user_id) if user_id else "none"
         if uid in self.sleeper:
             return self.sleeper[uid]
+        if label and norm_name(label) in self.sleeper_name:
+            return self.sleeper_name[norm_name(label)]
         key = f"{UNMAPPED_PREFIX}sleeper:{uid}"
         self.unmapped.setdefault(key, f"Sleeper user_id={uid} name={label!r}")
         return key

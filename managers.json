@@ -1,0 +1,200 @@
+[
+  {
+    "manager_id": "ovisnipes",
+    "display_name": "OviSnipes",
+    "sleeper_names": [
+      "OviSnipes"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "JernyFootball",
+      "2017": "JernyFootball",
+      "2018": "JernyFootball",
+      "2019": "JernyFootball",
+      "2020": "CeeDee's TDs"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "sackodeeznutz",
+    "display_name": "SackoDeezNutz",
+    "sleeper_names": [
+      "SackoDeezNutz"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "Scissor Me Timbers",
+      "2017": "Mom's Dirty Plumbus",
+      "2018": "Sacko Deez Nutz",
+      "2019": "Valar Morghulis",
+      "2020": "Saquon's Seppuku"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "oriontheblacksmith",
+    "display_name": "oriontheblacksmith",
+    "sleeper_names": [
+      "oriontheblacksmith"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "Beard Beer Beard",
+      "2017": "Beard Beer Beard",
+      "2018": "Beard Beer Beard",
+      "2019": "daSEARCHformoreMONEY",
+      "2020": "Bring out your dead!"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "kempbartlett",
+    "display_name": "kempbartlett",
+    "sleeper_names": [
+      "kempbartlett"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "The Reed Wedding",
+      "2017": "The Reed Wedding",
+      "2018": "I got a Thielen",
+      "2019": "Stefon Digglett",
+      "2020": "Harambe's Militia"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "ryanlboysboys",
+    "display_name": "ryanLboysboys",
+    "sleeper_names": [
+      "ryanLboysboys"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "Ryan's Team",
+      "2017": "Dak To The Future",
+      "2018": "Dak To The Future",
+      "2019": "LightsCameraDaktion",
+      "2020": "FreshPrinceOfHelaire"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "drinkingurbeers",
+    "display_name": "DrinkingUrBeers",
+    "sleeper_names": [
+      "DrinkingUrBeers"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "Danger Zone",
+      "2017": "Danger Zone",
+      "2018": "Danger Zone",
+      "2019": "Danger Zone",
+      "2020": "Danger Zone"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "stretcharmstrong92",
+    "display_name": "StretchArmstrong92",
+    "sleeper_names": [
+      "StretchArmstrong92"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2020": "Please don't do it J.K."
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "kempsucks421",
+    "display_name": "kempsucks421",
+    "sleeper_names": [
+      "kempsucks421"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "JPP's Right hand Man",
+      "2017": "Mr. Meeseeks",
+      "2018": "Book of Eli",
+      "2019": "Mr. PoopyButtHole",
+      "2020": "Poop who took a Pee"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "shoetouch",
+    "display_name": "ShoeTouch",
+    "sleeper_names": [
+      "ShoeTouch"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2018": "Viagra Salesman",
+      "2019": "Hunt's Kicked Kupps",
+      "2020": "Rise My Lazard King!"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "propersian93",
+    "display_name": "ProPersian93",
+    "sleeper_names": [
+      "ProPersian93"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "MY NAME IS JEFF",
+      "2017": "MY NAME IS JEFF",
+      "2018": "MY NAME IS JEFF",
+      "2019": "Team Of All Trades",
+      "2020": "Kittle Cooked"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "jswanberg",
+    "display_name": "jswanberg",
+    "sleeper_names": [
+      "jswanberg"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "Weenie Hut Jr's",
+      "2017": "The Juice Is Loose",
+      "2018": "Hammer Time",
+      "2019": "Haunting@ Hill House",
+      "2020": "X-Wing @Aliciousness"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "glenrhodes",
+    "display_name": "GlenRhodes",
+    "sleeper_names": [
+      "GlenRhodes"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+      "2016": "KingCharlesShallFall",
+      "2017": "Coach Z",
+      "2018": "Minnesota Vikings",
+      "2019": "A Team Has No Name",
+      "2020": "DK's Right Arm Bicep"
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  }
+]

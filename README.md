@@ -23,6 +23,21 @@ python scripts/sanity_report.py     # games/managers per season, unmapped users,
 - Completed seasons get a `_complete` marker and are never fetched again. Only the in-progress season is re-fetched. Use `--force` to re-fetch everything.
 - Any Sleeper user who isn't in `managers.json` is listed as **unmapped** in the report. Their games are kept, never dropped.
 
+## Managers (identity map)
+
+`manager_map.csv` has one row per person. The first column is their Sleeper username, and each year column
+is their Yahoo team name for that season. Leave a cell blank if they weren't in the league that year.
+Two optional extras:
+- A `DisplayName` column overrides the name shown on the site.
+- For someone who never played on Sleeper, leave the first column blank and fill in `DisplayName`.
+
+```bash
+python scripts/import_manager_map.py      # regenerates managers.json and keeps any hand edits
+```
+
+Each row is exactly one person, even if a newcomer took over someone's old team slot or team name.
+Any team that isn't in the CSV is reported as unmapped and kept in the data, never guessed.
+
 ## Tests
 
 ```bash
