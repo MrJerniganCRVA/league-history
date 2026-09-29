@@ -26,6 +26,11 @@ from common import CONFIG_PATH, MANAGER_MAP_CSV, ROOT, YAHOO_RAW, load_config, w
 
 TOKEN_PATH = ROOT / "yahoo_token.json"
 
+# Yahoo NFL game keys are fixed per season. Using these avoids the /games lookup, which Yahoo
+# rejects ("not authorized") for some older seasons.
+NFL_GAME_KEYS = {2014: "331", 2015: "348", 2016: "359", 2017: "371", 2018: "380",
+                 2019: "390", 2020: "399", 2021: "406", 2022: "414", 2023: "423"}
+
 
 # ---------------------------------------------------------------- pure helpers (unit tested)
 
@@ -73,19 +78,69 @@ def tag_game_types(games: list[dict], playoff_start: int, seeds: dict[str, int],
 
 # ---------------------------------------------------------------- yahoo access
 
+NOT_AUTHORIZED_HELP = """
+Yahoo refused the request: "This application is not authorized to perform this action."
+The saved token has been deleted. Fix the app, then re-run (you'll get a fresh sign-in link):
+  1. https://developer.yahoo.com/apps/ -> your app -> API Permissions: tick Fantasy Sports, choose Read.
+     Client type: Confidential. If permissions can't be edited, create a new app and put its
+     key/secret in .env.
+  2. Make sure .env has the key/secret of THAT app (YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET).
+"""
+
+
+def _load_token(consumer_key: str | None) -> dict | None:
+    """Reuse the saved token only if it belongs to the app currently in .env.
+
+    YFPY prefers the key stored in the token over .env, so a token from an old app would
+    silently keep being used after you switch apps.
+    """
+    if not TOKEN_PATH.exists():
+        return None
+    token = json.loads(TOKEN_PATH.read_text())
+    if consumer_key and token.get("consumer_key") != consumer_key:
+        print("Saved Yahoo token is for a different app than .env; signing in again.")
+        TOKEN_PATH.unlink()
+        return None
+    return token
+
+
 def make_query():
+    import os
+
     from dotenv import load_dotenv
     from yfpy.query import YahooFantasySportsQuery
 
-    load_dotenv(ROOT / ".env")
-    token = json.loads(TOKEN_PATH.read_text()) if TOKEN_PATH.exists() else None
+    load_dotenv(ROOT / ".env", override=True)
+    key = os.environ.get("YAHOO_CONSUMER_KEY")
+    if not key or not os.environ.get("YAHOO_CONSUMER_SECRET"):
+        raise SystemExit("Missing YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET in .env")
     q = YahooFantasySportsQuery(
         league_id="0", game_code="nfl",
-        yahoo_access_token_json=token,
+        yahoo_access_token_json=_load_token(key),
         browser_callback=False,  # print the auth URL instead of opening a browser (headless Pi)
     )
-    TOKEN_PATH.write_text(json.dumps(q._yahoo_access_token_dict, indent=2))
+    print(f"Using Yahoo app key ...{key[-6:]}")
     return q
+
+
+def save_token(q) -> None:
+    """Called only after a request succeeds, so a token that can't read fantasy data is never kept."""
+    TOKEN_PATH.write_text(json.dumps(q._yahoo_access_token_dict, indent=2))
+
+
+def check_access(q) -> None:
+    try:
+        q.get_game_key_by_season(2018)  # a request that needs Fantasy Sports read access
+    except Exception as e:  # yfpy raises YahooFantasySportsDataNotFound with Yahoo's message
+        if "not authorized" in str(e).lower():
+            TOKEN_PATH.unlink(missing_ok=True)
+            raise SystemExit(NOT_AUTHORIZED_HELP)
+        raise
+    save_token(q)
+
+
+def game_key_for(q, season: int) -> str:
+    return NFL_GAME_KEYS.get(season) or q.get_game_key_by_season(season)
 
 
 def use_league(q, game_key: str, league_id: str) -> None:
@@ -103,7 +158,7 @@ def discover_league_ids(q, cfg: dict) -> dict[str, str]:
         raise SystemExit("config.json: need at least one Yahoo league ID to start the renew chain")
     season, league_id = known[-1], leagues[str(known[-1])]  # earliest known, walk backwards
     while season > first:
-        use_league(q, q.get_game_key_by_season(season), league_id)
+        use_league(q, game_key_for(q, season), league_id)
         prev = parse_renew(txt(q.get_league_metadata().renew))
         if not prev:
             print(f"  renew chain ends at {season}; no link to {season - 1}")
@@ -117,7 +172,7 @@ def discover_league_ids(q, cfg: dict) -> dict[str, str]:
 
 
 def export_season(q, season: int, league_id: str) -> dict:
-    game_key = q.get_game_key_by_season(season)
+    game_key = game_key_for(q, season)
     use_league(q, game_key, league_id)
     meta = q.get_league_metadata()
     settings = q.get_league_settings()
@@ -198,6 +253,7 @@ def main() -> int:
 
     cfg = load_config()
     q = make_query()
+    check_access(q)
 
     print("Resolving league IDs...")
     leagues = discover_league_ids(q, cfg)
@@ -207,6 +263,7 @@ def main() -> int:
         print("  updated config.json")
 
     seasons = args.seasons or sorted(int(s) for s in leagues)
+    failed: list[int] = []
     for season in seasons:
         lid = leagues.get(str(season))
         if not lid:
@@ -214,16 +271,23 @@ def main() -> int:
                   f"(it's the number in the Yahoo league URL) and re-run.")
             continue
         print(f"Exporting {season} (league {lid})...")
-        data = export_season(q, season, lid)
+        try:
+            data = export_season(q, season, lid)
+        except Exception as e:  # keep going so one bad season doesn't block the rest
+            print(f"! {season} failed: {e}")
+            failed.append(season)
+            continue
         write_json(YAHOO_RAW / f"{season}.json", data)
         n = {t: sum(g["game_type"] == t for g in data["games"]) for t in ("regular", "playoff", "consolation")}
         champ = next((t["name"] for t in data["teams"] if t["team_key"] == data["champion_team_key"]), "?")
         print(f"  {season}: {len(data['teams'])} teams, {n}, champion: {champ}")
 
+    if failed:
+        print(f"\nFailed seasons: {failed} (paste the messages above to Claude)")
     print("\nChecking manager_map.csv against the export:")
     from import_manager_map import _sleeper_users, _yahoo_teams, parse_csv, report
     report(parse_csv(MANAGER_MAP_CSV), _sleeper_users(), _yahoo_teams())
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
