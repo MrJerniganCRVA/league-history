@@ -73,19 +73,65 @@ def tag_game_types(games: list[dict], playoff_start: int, seeds: dict[str, int],
 
 # ---------------------------------------------------------------- yahoo access
 
+NOT_AUTHORIZED_HELP = """
+Yahoo refused the request: "This application is not authorized to perform this action."
+The saved token has been deleted. Fix the app, then re-run (you'll get a fresh sign-in link):
+  1. https://developer.yahoo.com/apps/ -> your app -> API Permissions: tick Fantasy Sports, choose Read.
+     Client type: Confidential. If permissions can't be edited, create a new app and put its
+     key/secret in .env.
+  2. Make sure .env has the key/secret of THAT app (YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET).
+"""
+
+
+def _load_token(consumer_key: str | None) -> dict | None:
+    """Reuse the saved token only if it belongs to the app currently in .env.
+
+    YFPY prefers the key stored in the token over .env, so a token from an old app would
+    silently keep being used after you switch apps.
+    """
+    if not TOKEN_PATH.exists():
+        return None
+    token = json.loads(TOKEN_PATH.read_text())
+    if consumer_key and token.get("consumer_key") != consumer_key:
+        print("Saved Yahoo token is for a different app than .env; signing in again.")
+        TOKEN_PATH.unlink()
+        return None
+    return token
+
+
 def make_query():
+    import os
+
     from dotenv import load_dotenv
     from yfpy.query import YahooFantasySportsQuery
 
-    load_dotenv(ROOT / ".env")
-    token = json.loads(TOKEN_PATH.read_text()) if TOKEN_PATH.exists() else None
+    load_dotenv(ROOT / ".env", override=True)
+    key = os.environ.get("YAHOO_CONSUMER_KEY")
+    if not key or not os.environ.get("YAHOO_CONSUMER_SECRET"):
+        raise SystemExit("Missing YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET in .env")
     q = YahooFantasySportsQuery(
         league_id="0", game_code="nfl",
-        yahoo_access_token_json=token,
+        yahoo_access_token_json=_load_token(key),
         browser_callback=False,  # print the auth URL instead of opening a browser (headless Pi)
     )
-    TOKEN_PATH.write_text(json.dumps(q._yahoo_access_token_dict, indent=2))
+    print(f"Using Yahoo app key ...{key[-6:]}")
     return q
+
+
+def save_token(q) -> None:
+    """Called only after a request succeeds, so a token that can't read fantasy data is never kept."""
+    TOKEN_PATH.write_text(json.dumps(q._yahoo_access_token_dict, indent=2))
+
+
+def check_access(q) -> None:
+    try:
+        q.get_game_key_by_season(2018)
+    except Exception as e:  # yfpy raises YahooFantasySportsDataNotFound with Yahoo's message
+        if "not authorized" in str(e).lower():
+            TOKEN_PATH.unlink(missing_ok=True)
+            raise SystemExit(NOT_AUTHORIZED_HELP)
+        raise
+    save_token(q)
 
 
 def use_league(q, game_key: str, league_id: str) -> None:
@@ -198,6 +244,7 @@ def main() -> int:
 
     cfg = load_config()
     q = make_query()
+    check_access(q)
 
     print("Resolving league IDs...")
     leagues = discover_league_ids(q, cfg)
