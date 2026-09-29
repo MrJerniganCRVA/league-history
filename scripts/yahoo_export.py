@@ -119,7 +119,8 @@ def make_query():
         yahoo_access_token_json=_load_token(key),
         browser_callback=False,  # print the auth URL instead of opening a browser (headless Pi)
     )
-    print(f"Using Yahoo app key ...{key[-6:]}")
+    print(f"Using Yahoo app key ...{key[-6:]} "
+          f"({'saved sign-in' if TOKEN_PATH.exists() else 'new sign-in'})")
     return q
 
 
@@ -246,13 +247,51 @@ def export_season(q, season: int, league_id: str) -> dict:
     }
 
 
+def _probe(label: str, fn):
+    try:
+        result = fn()
+    except Exception as e:  # report every failure instead of stopping at the first
+        msg = str(e).split("failed with error:")[-1].strip()
+        print(f"  FAIL  {label}: {msg[:160]}")
+        return None
+    print(f"  OK    {label}")
+    return result
+
+
+def diagnose(q, cfg: dict) -> None:
+    """Try each Yahoo request separately and print OK/FAIL; only the sign-in token is saved."""
+    print("\nDiagnosis (no league data is written):")
+    user = _probe("current user", q.get_current_user)
+    if user is not None:
+        save_token(q)
+        print(f"        signed in as Yahoo guid {txt(getattr(user, 'guid', '?'))}")
+    for season_str, lid in sorted(cfg["yahoo_leagues"].items()):
+        season = int(season_str)
+        key = NFL_GAME_KEYS.get(season)
+        print(f"\n  {season} (game key {key}, league id in config: {lid or 'unknown'})")
+        _probe(f"{season} season-info lookup", lambda: q.get_game_key_by_season(season))
+        mine = _probe(f"{season} leagues this account was in", lambda: q.get_user_leagues_by_game_key(key))
+        for lg in mine or []:
+            print(f"        - {txt(getattr(lg, 'name', ''))}  (league id {txt(getattr(lg, 'league_id', ''))})")
+        if mine is not None and not mine:
+            print("        (none: this Yahoo account wasn't in a league that season)")
+        if lid:
+            use_league(q, key, lid)
+            _probe(f"{season} league {lid} metadata", q.get_league_metadata)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("seasons", nargs="*", type=int)
+    ap.add_argument("--diagnose", action="store_true",
+                    help="test each Yahoo request and print OK/FAIL; writes no league data")
     args = ap.parse_args()
 
     cfg = load_config()
     q = make_query()
+    if args.diagnose:
+        diagnose(q, cfg)
+        return 0
     check_access(q)
 
     print("Resolving league IDs...")
