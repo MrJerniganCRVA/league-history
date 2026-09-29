@@ -7,6 +7,12 @@ from collections import Counter, defaultdict
 from common import SLEEPER_RAW, Resolver
 
 
+def _champ(season: dict) -> str:
+    if season.get("champion"):
+        return season["champion"]
+    return "(in progress)" if season.get("status", "complete") != "complete" else "??"
+
+
 def print_report(games: list[dict], seasons: list[dict], issues: dict[int, list[str]],
                  unmapped: dict[str, str], out=sys.stdout) -> None:
     p = lambda *a: print(*a, file=out)  # noqa: E731
@@ -20,7 +26,7 @@ def print_report(games: list[dict], seasons: list[dict], issues: dict[int, list[
     for s in sorted(seasons, key=lambda s: s["season"]):
         c = per_season[s["season"]]
         p(f"{s['season']:<8}{s['platform']:<9}{c['regular']:>5}{c['playoff']:>5}"
-          f"{c['consolation']:>6}{len(s['managers']):>6}  {s.get('champion') or '??'}")
+          f"{c['consolation']:>6}{len(s['managers']):>6}  {_champ(s)}")
     p(f"TOTAL games: {len(games)}")
 
     p("\nManagers per season:")
