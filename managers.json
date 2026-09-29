@@ -85,10 +85,10 @@
     "yahoo_team_names_fallback": []
   },
   {
-    "manager_id": "drinkingurbeers",
-    "display_name": "DrinkingUrBeers",
+    "manager_id": "drinkinurbeers",
+    "display_name": "DrinkinUrBeers",
     "sleeper_names": [
-      "DrinkingUrBeers"
+      "DrinkinUrBeers"
     ],
     "sleeper_user_ids": [],
     "yahoo_team_names_by_season": {
@@ -115,6 +115,18 @@
     "yahoo_team_names_fallback": []
   },
   {
+    "manager_id": "dinkleburg",
+    "display_name": "Dinkleburg",
+    "sleeper_names": [
+      "Dinkleburg"
+    ],
+    "sleeper_user_ids": [],
+    "yahoo_team_names_by_season": {
+    },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+    {
     "manager_id": "kempsucks421",
     "display_name": "kempsucks421",
     "sleeper_names": [
@@ -181,10 +193,10 @@
     "yahoo_team_names_fallback": []
   },
   {
-    "manager_id": "glenrhodes",
-    "display_name": "GlenRhodes",
+    "manager_id": "glennrhodes",
+    "display_name": "GlennRhodes",
     "sleeper_names": [
-      "GlenRhodes"
+      "GlennRhodes"
     ],
     "sleeper_user_ids": [],
     "yahoo_team_names_by_season": {
