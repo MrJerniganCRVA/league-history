@@ -49,6 +49,8 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
     settings = league.get("settings", {})
     playoff_start = int(settings.get("playoff_week_start") or 99)
     complete = league.get("status") == "complete"
+    # In-season, ignore weeks Sleeper hasn't finished scoring (e.g. only TNF played so far).
+    scored_through = None if complete else int(settings.get("last_scored_leg") or 0)
     issues: list[str] = []
 
     names = {u["user_id"]: (u.get("display_name") or (u.get("metadata") or {}).get("team_name") or "")
@@ -64,6 +66,8 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
     missing_weeks: list[int] = []
     for path in sorted((season_dir / "matchups").glob("*.json")):
         week = int(path.stem)
+        if scored_through is not None and week > scored_through:
+            continue
         entries = read_json(path, []) or []
         by_matchup: dict[int, list[dict]] = defaultdict(list)
         for e in entries:
@@ -93,7 +97,7 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
 
     champion = None
     final = next((m for m in wb if m.get("p") == 1 and m.get("w") is not None), None)
-    if final:
+    if final and complete:
         champion = who(int(final["w"]))
     elif complete:
         issues.append("no championship result in winners_bracket")

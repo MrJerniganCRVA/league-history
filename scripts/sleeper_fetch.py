@@ -62,6 +62,9 @@ def fetch_season(client: HttpClient, league_id: str, league: dict) -> None:
         write_json(out / f"{name}.json", client.get_json(f"{API}/league/{league_id}/{name}"))
     wb = read_json(out / "winners_bracket.json")
     n = last_week(league, wb)
+    if league.get("status") != "complete":
+        # current season: nothing past the week in progress exists yet
+        n = min(n, int(league.get("settings", {}).get("last_scored_leg") or 0) + 1)
     for week in range(1, n + 1):
         data = client.get_json(f"{API}/league/{league_id}/matchups/{week}")
         write_json(out / "matchups" / f"{week:02d}.json", data)

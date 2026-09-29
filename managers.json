@@ -5,7 +5,9 @@
     "sleeper_names": [
       "OviSnipes"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "724606664573030400"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "JernyFootball",
       "2017": "JernyFootball",
@@ -22,7 +24,9 @@
     "sleeper_names": [
       "SackoDeezNutz"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "606582893128519680"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "Scissor Me Timbers",
       "2017": "Mom's Dirty Plumbus",
@@ -39,7 +43,9 @@
     "sleeper_names": [
       "oriontheblacksmith"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "723998790503288832"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "Beard Beer Beard",
       "2017": "Beard Beer Beard",
@@ -56,7 +62,9 @@
     "sleeper_names": [
       "kempbartlett"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "733723153364291584"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "The Reed Wedding",
       "2017": "The Reed Wedding",
@@ -73,7 +81,9 @@
     "sleeper_names": [
       "ryanLboysboys"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "724053245596626944"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "Ryan's Team",
       "2017": "Dak To The Future",
@@ -90,7 +100,9 @@
     "sleeper_names": [
       "DrinkinUrBeers"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "724070538124824576"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "Danger Zone",
       "2017": "Danger Zone",
@@ -107,7 +119,9 @@
     "sleeper_names": [
       "StretchArmstrong92"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "610802855548379136"
+    ],
     "yahoo_team_names_by_season": {
       "2020": "Please don't do it J.K."
     },
@@ -115,24 +129,14 @@
     "yahoo_team_names_fallback": []
   },
   {
-    "manager_id": "dinkleburg",
-    "display_name": "Dinkleburg",
-    "sleeper_names": [
-      "Dinkleburg"
-    ],
-    "sleeper_user_ids": [],
-    "yahoo_team_names_by_season": {
-    },
-    "yahoo_manager_guids": [],
-    "yahoo_team_names_fallback": []
-  },
-    {
     "manager_id": "kempsucks421",
     "display_name": "kempsucks421",
     "sleeper_names": [
       "kempsucks421"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "730969160816947200"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "JPP's Right hand Man",
       "2017": "Mr. Meeseeks",
@@ -149,7 +153,9 @@
     "sleeper_names": [
       "ShoeTouch"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "360068176786096128"
+    ],
     "yahoo_team_names_by_season": {
       "2018": "Viagra Salesman",
       "2019": "Hunt's Kicked Kupps",
@@ -164,7 +170,9 @@
     "sleeper_names": [
       "ProPersian93"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "724482917807513600"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "MY NAME IS JEFF",
       "2017": "MY NAME IS JEFF",
@@ -181,7 +189,9 @@
     "sleeper_names": [
       "jswanberg"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "733715630183833600"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "Weenie Hut Jr's",
       "2017": "The Juice Is Loose",
@@ -198,7 +208,9 @@
     "sleeper_names": [
       "GlennRhodes"
     ],
-    "sleeper_user_ids": [],
+    "sleeper_user_ids": [
+      "723984909856772096"
+    ],
     "yahoo_team_names_by_season": {
       "2016": "KingCharlesShallFall",
       "2017": "Coach Z",
@@ -206,6 +218,19 @@
       "2019": "A Team Has No Name",
       "2020": "DK's Right Arm Bicep"
     },
+    "yahoo_manager_guids": [],
+    "yahoo_team_names_fallback": []
+  },
+  {
+    "manager_id": "dinkleburg",
+    "display_name": "Dinkleburg",
+    "sleeper_names": [
+      "Dinkleburg"
+    ],
+    "sleeper_user_ids": [
+      "473975085716205568"
+    ],
+    "yahoo_team_names_by_season": {},
     "yahoo_manager_guids": [],
     "yahoo_team_names_fallback": []
   }

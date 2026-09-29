@@ -23,6 +23,24 @@ python scripts/sanity_report.py     # games/managers per season, unmapped users,
 - Completed seasons get a `_complete` marker and are never fetched again. Only the in-progress season is re-fetched. Use `--force` to re-fetch everything.
 - Any Sleeper user who isn't in `managers.json` is listed as **unmapped** in the report. Their games are kept, never dropped.
 
+## Yahoo (Phase 2): one-time export, run locally
+
+1. Create an app at https://developer.yahoo.com/apps/ with the API permission **Fantasy Sports → Read** and the redirect URI `oob`.
+2. Create a `.env` file in the repo root. It's gitignored, so it never gets committed:
+   ```
+   YAHOO_CONSUMER_KEY=your_key
+   YAHOO_CONSUMER_SECRET=your_secret
+   ```
+3. Run the export:
+   ```bash
+   python scripts/yahoo_export.py          # every season in config.json (2016-2020)
+   python scripts/yahoo_export.py 2018     # or specific seasons
+   ```
+   - The first run prints an **AUTHORIZATION URL**. Open it on any device, approve access, then paste the code back into the terminal.
+   - The token is saved to `yahoo_token.json` (gitignored), so later runs don't ask again.
+   - The 2016 and 2017 league IDs are found automatically by following Yahoo's `renew` links and written to `config.json`.
+4. Commit `data_raw/yahoo/*.json` and `config.json`. The script ends by listing any Yahoo team that isn't in `manager_map.csv`.
+
 ## Managers (identity map)
 
 `manager_map.csv` has one row per person. The first column is their Sleeper username, and each year column

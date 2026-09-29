@@ -75,6 +75,25 @@ class SleeperNormalizeTest(unittest.TestCase):
         self.assertIn("Dana", buf.getvalue())
 
 
+class InSeasonTest(unittest.TestCase):
+    def test_weeks_past_last_scored_leg_ignored(self):
+        import json
+        import shutil
+        import tempfile
+        tmp = Path(tempfile.mkdtemp()) / "2023"
+        shutil.copytree(HERE / "fixtures" / "sleeper" / "2023", tmp)
+        league = json.loads((tmp / "league.json").read_text())
+        league["status"] = "in_season"
+        league["settings"]["last_scored_leg"] = 1  # week 2 has partial (non-zero) scores
+        (tmp / "league.json").write_text(json.dumps(league))
+        games, meta, _ = normalize_sleeper_season(tmp, Resolver(MANAGERS))
+        self.assertEqual({g["week"] for g in games}, {1})
+        self.assertIsNone(meta["champion"])
+        buf = io.StringIO()
+        print_report(games, [meta], {}, {}, out=buf)
+        self.assertIn("(in progress)", buf.getvalue())
+
+
 class PlayoffWeeksTest(unittest.TestCase):
     def test_round_types(self):
         lg = {"settings": {"playoff_week_start": 15, "playoff_round_type": 0}}
