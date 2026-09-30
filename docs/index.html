@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home · League History</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/pages/home.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" data-keep-filters><span aria-hidden="true">🏈</span> <span data-site-title>League History</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html" data-keep-filters aria-current="page">Home</a>
+      <a href="records.html" data-keep-filters>Records</a>
+      <a href="h2h.html" data-keep-filters>Head-to-head</a>
+      <a href="rivalry.html" data-keep-filters>Rivalry</a>
+    </nav>
+  </header>
+  <main>
+  <section class="hero">
+    <p class="eyebrow">League history</p>
+    <h1 data-site-title>League History</h1>
+    <p class="sub" id="through"></p>
+  </section>
+  <section class="card">
+    <h2>Did you know?</h2>
+    <ul id="facts" class="facts"></ul>
+    <button type="button" id="more-facts" class="link-btn">Show 3 more</button>
+  </section>
+  <section class="card">
+    <h2>Champions</h2>
+    <div id="champions"></div>
+  </section>
+  <nav class="tiles" aria-label="Pages">
+    <a href="records.html" data-keep-filters class="tile"><strong>Records</strong><span>Highs, lows, blowouts, heartbreakers</span></a>
+    <a href="h2h.html" data-keep-filters class="tile"><strong>Head-to-head</strong><span>Everyone's record against everyone</span></a>
+    <a href="rivalry.html" data-keep-filters class="tile"><strong>Rivalries</strong><span>Pick two managers, see the full history</span></a>
+  </nav>
+  </main>
+  <footer class="site-footer"><span id="footer-note"></span></footer>
+</body>
+</html>

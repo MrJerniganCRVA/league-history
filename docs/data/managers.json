@@ -1,0 +1,93 @@
+[
+  {
+    "manager_id": "dinkleburg",
+    "display_name": "Dinkleburg",
+    "first_season": 2024,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "drinkinurbeers",
+    "display_name": "DrinkinUrBeers",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "glennrhodes",
+    "display_name": "GlennRhodes",
+    "first_season": 2021,
+    "last_season": 2023,
+    "active": false
+  },
+  {
+    "manager_id": "jswanberg",
+    "display_name": "jswanberg",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "kempbartlett",
+    "display_name": "kempbartlett",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "kempsucks421",
+    "display_name": "kempsucks421",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "oriontheblacksmith",
+    "display_name": "oriontheblacksmith",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "ovisnipes",
+    "display_name": "OviSnipes",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "propersian93",
+    "display_name": "ProPersian93",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "ryanlboysboys",
+    "display_name": "ryanLboysboys",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "sackodeeznutz",
+    "display_name": "SackoDeezNutz",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "shoetouch",
+    "display_name": "ShoeTouch",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  },
+  {
+    "manager_id": "stretcharmstrong92",
+    "display_name": "StretchArmstrong92",
+    "first_season": 2021,
+    "last_season": 2026,
+    "active": true
+  }
+]

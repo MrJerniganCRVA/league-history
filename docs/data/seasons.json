@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "site_title": "Ardi's Bad Trade Bazaar and Emporium",
+    "data_through": {
+      "season": 2026,
+      "week": 3
+    },
+    "platforms": [
+      "sleeper"
+    ]
+  },
+  "seasons": [
+    {
+      "season": 2021,
+      "platform": "sleeper",
+      "status": "complete",
+      "managers": [
+        "drinkinurbeers",
+        "glennrhodes",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 13,
+      "playoff_start_week": 14,
+      "champion": "ryanlboysboys",
+      "last_place": "oriontheblacksmith",
+      "last_place_source": "regular_season_record"
+    },
+    {
+      "season": 2022,
+      "platform": "sleeper",
+      "status": "complete",
+      "managers": [
+        "drinkinurbeers",
+        "glennrhodes",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 13,
+      "playoff_start_week": 14,
+      "champion": "stretcharmstrong92",
+      "last_place": "drinkinurbeers",
+      "last_place_source": "regular_season_record"
+    },
+    {
+      "season": 2023,
+      "platform": "sleeper",
+      "status": "complete",
+      "managers": [
+        "drinkinurbeers",
+        "glennrhodes",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 13,
+      "playoff_start_week": 14,
+      "champion": "shoetouch",
+      "last_place": "kempsucks421",
+      "last_place_source": "regular_season_record"
+    },
+    {
+      "season": 2024,
+      "platform": "sleeper",
+      "status": "complete",
+      "managers": [
+        "dinkleburg",
+        "drinkinurbeers",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 13,
+      "playoff_start_week": 14,
+      "champion": "drinkinurbeers",
+      "last_place": "ovisnipes",
+      "last_place_source": "regular_season_record"
+    },
+    {
+      "season": 2025,
+      "platform": "sleeper",
+      "status": "complete",
+      "managers": [
+        "dinkleburg",
+        "drinkinurbeers",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 14,
+      "playoff_start_week": 15,
+      "champion": "stretcharmstrong92",
+      "last_place": "ryanlboysboys",
+      "last_place_source": "regular_season_record"
+    },
+    {
+      "season": 2026,
+      "platform": "sleeper",
+      "status": "in_season",
+      "managers": [
+        "dinkleburg",
+        "drinkinurbeers",
+        "jswanberg",
+        "kempbartlett",
+        "kempsucks421",
+        "oriontheblacksmith",
+        "ovisnipes",
+        "propersian93",
+        "ryanlboysboys",
+        "sackodeeznutz",
+        "shoetouch",
+        "stretcharmstrong92"
+      ],
+      "regular_weeks": 14,
+      "playoff_start_week": 15,
+      "champion": null,
+      "last_place": null,
+      "last_place_source": null
+    }
+  ]
+}

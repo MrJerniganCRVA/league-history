@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rivalry · League History</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/pages/rivalry.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" data-keep-filters><span aria-hidden="true">🏈</span> <span data-site-title>League History</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html" data-keep-filters>Home</a>
+      <a href="records.html" data-keep-filters>Records</a>
+      <a href="h2h.html" data-keep-filters>Head-to-head</a>
+      <a href="rivalry.html" data-keep-filters aria-current="page">Rivalry</a>
+    </nav>
+  </header>
+  <main>
+  <h1>Rivalry</h1>
+  <div id="filters"></div>
+  <form id="pickers" class="pickers" aria-label="Pick managers">
+    <label>Manager <select name="a"></select></label>
+    <span class="vs">vs</span>
+    <label>Manager <select name="b"></select></label>
+  </form>
+  <div id="rivalry"></div>
+  </main>
+  <footer class="site-footer"><span id="footer-note"></span></footer>
+</body>
+</html>

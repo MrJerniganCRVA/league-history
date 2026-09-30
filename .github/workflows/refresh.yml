@@ -1,0 +1,45 @@
+name: Refresh Sleeper data
+
+on:
+  schedule:
+    # Tuesdays 12:17 UTC (after Monday Night Football), September through January
+    - cron: "17 12 * 9-12,1 2"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch current Sleeper season
+        run: python scripts/sleeper_fetch.py
+
+      - name: Build site data
+        run: python scripts/build_games.py
+
+      - name: Commit changes
+        run: |
+          git add data_raw/sleeper docs/data
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh Sleeper data"
+          git push
