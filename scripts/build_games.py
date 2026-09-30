@@ -52,8 +52,9 @@ def normalize_yahoo_season(path: Path, resolver: Resolver) -> tuple[list[dict], 
         "regular_weeks": (playoff_start - 1) if playoff_start else None,
         "playoff_start_week": playoff_start,
         "champion": who(champ) if champ else None,
-        "last_place": who(last) if last else None,
-        "last_place_source": "final_rank" if last else None,
+        # Yahoo's final standings already account for the consolation/loser bracket
+        "sacko": who(last) if last else None,
+        "last_place_regular": None,  # computed from regular-season games in apply_results
         "missing_weeks": [],
     }
     if not champ:
@@ -79,18 +80,27 @@ def regular_season_last(games: list[dict], season: int) -> str | None:
 
 
 def apply_results(games: list[dict], seasons: list[dict], cfg: dict) -> None:
-    champ_over = {str(k): v for k, v in (cfg.get("champion_overrides") or {}).items()}
-    last_over = {str(k): v for k, v in (cfg.get("last_place_overrides") or {}).items()}
+    """Champion, Sacko and regular-season last place, with config.json overrides winning."""
+    def overrides(key: str) -> dict[str, str]:
+        return {str(k): v for k, v in (cfg.get(key) or {}).items()}
+
+    champ_over = overrides("champion_overrides")
+    sacko_over = overrides("sacko_overrides")
+    last_over = overrides("last_place_overrides")
     for s in seasons:
         key = str(s["season"])
+        s.setdefault("sacko", None)
         if key in champ_over:
             s["champion"] = champ_over[key]
+        if key in sacko_over:
+            s["sacko"] = sacko_over[key]
         if key in last_over:
-            s["last_place"], s["last_place_source"] = last_over[key], "override"
-        elif not s.get("last_place") and s.get("status") == "complete":
-            s["last_place"] = regular_season_last(games, s["season"])
-            s["last_place_source"] = "regular_season_record" if s["last_place"] else None
-        s.setdefault("last_place_source", None)
+            s["last_place_regular"], s["last_place_regular_source"] = last_over[key], "override"
+        elif not s.get("last_place_regular") and s.get("status") == "complete":
+            s["last_place_regular"] = regular_season_last(games, s["season"])
+            s["last_place_regular_source"] = "regular_season_record" if s["last_place_regular"] else None
+        s.setdefault("last_place_regular", None)
+        s.setdefault("last_place_regular_source", None)
 
 
 def build_managers(games: list[dict], resolver: Resolver, latest_season: int | None) -> list[dict]:

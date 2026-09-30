@@ -51,6 +51,11 @@ def print_report(games: list[dict], seasons: list[dict], issues: dict[int, list[
                 if not s.get("champion") and s.get("status", "complete") == "complete"]
     p(f"  {no_champ or 'none'}")
 
+    p("\nSeasons without a Sacko (loser-bracket loser):")
+    no_sacko = [s["season"] for s in seasons
+                if not s.get("sacko") and s.get("status", "complete") == "complete"]
+    p(f"  {no_sacko or 'none'}")
+
     p("\nOther issues:")
     any_issue = False
     for season in sorted(issues):

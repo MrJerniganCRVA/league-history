@@ -31,8 +31,9 @@
       "regular_weeks": 13,
       "playoff_start_week": 14,
       "champion": "ryanlboysboys",
-      "last_place": "oriontheblacksmith",
-      "last_place_source": "regular_season_record"
+      "sacko": "oriontheblacksmith",
+      "last_place_regular": "oriontheblacksmith",
+      "last_place_regular_source": "regular_season_record"
     },
     {
       "season": 2022,
@@ -55,8 +56,9 @@
       "regular_weeks": 13,
       "playoff_start_week": 14,
       "champion": "stretcharmstrong92",
-      "last_place": "drinkinurbeers",
-      "last_place_source": "regular_season_record"
+      "sacko": "jswanberg",
+      "last_place_regular": "drinkinurbeers",
+      "last_place_regular_source": "regular_season_record"
     },
     {
       "season": 2023,
@@ -79,8 +81,9 @@
       "regular_weeks": 13,
       "playoff_start_week": 14,
       "champion": "shoetouch",
-      "last_place": "kempsucks421",
-      "last_place_source": "regular_season_record"
+      "sacko": "glennrhodes",
+      "last_place_regular": "kempsucks421",
+      "last_place_regular_source": "regular_season_record"
     },
     {
       "season": 2024,
@@ -103,8 +106,9 @@
       "regular_weeks": 13,
       "playoff_start_week": 14,
       "champion": "drinkinurbeers",
-      "last_place": "ovisnipes",
-      "last_place_source": "regular_season_record"
+      "sacko": "sackodeeznutz",
+      "last_place_regular": "ovisnipes",
+      "last_place_regular_source": "regular_season_record"
     },
     {
       "season": 2025,
@@ -127,8 +131,9 @@
       "regular_weeks": 14,
       "playoff_start_week": 15,
       "champion": "stretcharmstrong92",
-      "last_place": "ryanlboysboys",
-      "last_place_source": "regular_season_record"
+      "sacko": "ryanlboysboys",
+      "last_place_regular": "ryanlboysboys",
+      "last_place_regular_source": "regular_season_record"
     },
     {
       "season": 2026,
@@ -151,8 +156,9 @@
       "regular_weeks": 14,
       "playoff_start_week": 15,
       "champion": null,
-      "last_place": null,
-      "last_place_source": null
+      "sacko": null,
+      "last_place_regular": null,
+      "last_place_regular_source": null
     }
   ]
 }

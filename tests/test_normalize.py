@@ -63,6 +63,24 @@ class SleeperNormalizeTest(unittest.TestCase):
     def test_champion(self):
         self.assertEqual(self.meta["champion"], "alice")
 
+    def test_sacko_is_lower_scorer_in_loser_bracket_final(self):
+        # losers_bracket p=1 is roster 3 (carl, 60) vs roster 4 (dana, 65) in week 3
+        self.assertEqual(self.meta["sacko"], "carl")
+
+    def test_sacko_tie_falls_back_to_bracket(self):
+        import json
+        import shutil
+        import tempfile
+        tmp = Path(tempfile.mkdtemp()) / "2023"
+        shutil.copytree(HERE / "fixtures" / "sleeper" / "2023", tmp)
+        week3 = json.loads((tmp / "matchups" / "03.json").read_text())
+        for e in week3:
+            if e["roster_id"] in (3, 4):
+                e["points"] = 70
+        (tmp / "matchups" / "03.json").write_text(json.dumps(week3))
+        _, meta, _ = normalize_sleeper_season(tmp, Resolver(MANAGERS))
+        self.assertEqual(meta["sacko"], "unmapped:sleeper:u4")  # bracket's `w` (roster 4)
+
     def test_unmapped_reported_not_dropped(self):
         key = "unmapped:sleeper:u4"
         self.assertIn(key, self.resolver.unmapped)
@@ -89,6 +107,7 @@ class InSeasonTest(unittest.TestCase):
         games, meta, _ = normalize_sleeper_season(tmp, Resolver(MANAGERS))
         self.assertEqual({g["week"] for g in games}, {1})
         self.assertIsNone(meta["champion"])
+        self.assertIsNone(meta["sacko"])
         buf = io.StringIO()
         print_report(games, [meta], {}, {}, out=buf)
         self.assertIn("(in progress)", buf.getvalue())

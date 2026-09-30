@@ -43,14 +43,16 @@ class LastPlaceTest(unittest.TestCase):
 
     def test_overrides_and_in_progress(self):
         games = [g(1, "a", 100, "b", 90)]
-        seasons = [{"season": 2023, "status": "complete", "champion": "a", "last_place": None},
-                   {"season": 2024, "status": "in_season", "champion": None, "last_place": None}]
+        seasons = [{"season": 2023, "status": "complete", "champion": "a", "sacko": "b"},
+                   {"season": 2024, "status": "in_season", "champion": None, "sacko": None}]
         apply_results(games, seasons, {"champion_overrides": {"2023": "b"}})
-        self.assertEqual((seasons[0]["champion"], seasons[0]["last_place"], seasons[0]["last_place_source"]),
-                         ("b", "b", "regular_season_record"))
-        self.assertIsNone(seasons[1]["last_place"])
-        apply_results(games, seasons, {"last_place_overrides": {2023: "a"}})
-        self.assertEqual((seasons[0]["last_place"], seasons[0]["last_place_source"]), ("a", "override"))
+        s = seasons[0]
+        self.assertEqual((s["champion"], s["sacko"], s["last_place_regular"], s["last_place_regular_source"]),
+                         ("b", "b", "b", "regular_season_record"))
+        self.assertIsNone(seasons[1]["last_place_regular"])
+        apply_results(games, seasons, {"last_place_overrides": {2023: "a"}, "sacko_overrides": {"2023": "a"}})
+        self.assertEqual((s["last_place_regular"], s["last_place_regular_source"], s["sacko"]),
+                         ("a", "override", "a"))
 
 
 class BuildTest(unittest.TestCase):
@@ -62,8 +64,8 @@ class BuildTest(unittest.TestCase):
         games, seasons, _ = build({}, Resolver(MANAGERS), HERE / "fixtures" / "sleeper", self.yahoo)
         self.assertEqual(len(games), 6)
         self.assertEqual([s["season"] for s in seasons], [2023])
-        self.assertEqual(seasons[0]["champion"], "alice")
-        self.assertEqual(seasons[0]["last_place_source"], "regular_season_record")
+        self.assertEqual((seasons[0]["champion"], seasons[0]["sacko"]), ("alice", "carl"))
+        self.assertEqual(seasons[0]["last_place_regular_source"], "regular_season_record")
 
     def test_yahoo_file_is_picked_up(self):
         self.yahoo.mkdir()
@@ -83,8 +85,9 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(len(y), 1)  # 0-0 game skipped
         self.assertEqual((y[0]["team_a"], y[0]["winner"]), ("alice", "alice"))
         s2020 = seasons[0]
-        self.assertEqual((s2020["champion"], s2020["last_place_source"]), ("alice", "final_rank"))
-        self.assertTrue(s2020["last_place"].startswith("unmapped:yahoo:2020:Ghost Team"))
+        self.assertEqual(s2020["champion"], "alice")
+        self.assertTrue(s2020["sacko"].startswith("unmapped:yahoo:2020:Ghost Team"))
+        self.assertEqual(s2020["last_place_regular"], "bob")  # only regular game: alice beat bob
 
     def test_bad_yahoo_file_is_an_error(self):
         self.yahoo.mkdir()

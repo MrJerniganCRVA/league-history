@@ -72,6 +72,20 @@ test('did you know', () => {
   assert.match(S.didYouKnowFacts(games).join(' '), /1 tie/);
 });
 
+test('title and Sacko facts need a clear leader', () => {
+  const seasons = [
+    { season: 2021, champion: 'A', sacko: 'D' },
+    { season: 2022, champion: 'A', sacko: 'C' },
+    { season: 2023, champion: 'B', sacko: 'D' },
+  ];
+  const facts = S.didYouKnowFacts(games, (id) => id, seasons).join(' ');
+  assert.match(facts, /A has the most titles: 2 championships/);
+  assert.match(facts, /D has taken home the Sacko 2 times/);
+  const tied = S.didYouKnowFacts(games, (id) => id, seasons.slice(0, 2)).join(' ');
+  assert.match(tied, /most titles/);
+  assert.doesNotMatch(tied, /Sacko/); // D and C have 1 each: no leader
+});
+
 test('filters', () => {
   const seasons = [2021, 2022];
   const f = readFilters('', seasons);

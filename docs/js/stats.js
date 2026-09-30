@@ -161,10 +161,26 @@ export function rivalry(games, a, b) {
   };
 }
 
-/** Candidate trivia lines; `name` maps manager_id -> display name. */
-export function didYouKnowFacts(games, name = (id) => id) {
+function mostOften(ids) {
+  const counts = new Map();
+  for (const id of ids) if (id) counts.set(id, (counts.get(id) || 0) + 1);
+  let best = null;
+  for (const [id, n] of counts) if (!best || n > best.n) best = { id, n };
+  const tied = best ? [...counts].filter(([, n]) => n === best.n).length : 0;
+  return best && best.n > 1 && tied === 1 ? best : null;
+}
+
+/**
+ * Candidate trivia lines; `name` maps manager_id -> display name.
+ * `seasons` (optional, from seasons.json) adds title and Sacko facts.
+ */
+export function didYouKnowFacts(games, name = (id) => id, seasons = []) {
   if (!games.length) return [];
   const facts = [];
+  const titles = mostOften(seasons.map((s) => s.champion));
+  if (titles) facts.push(`${name(titles.id)} has the most titles: ${titles.n} championships.`);
+  const sackos = mostOften(seasons.map((s) => s.sacko));
+  if (sackos) facts.push(`${name(sackos.id)} has taken home the Sacko ${sackos.n} times — more than anyone.`);
   const hi = highestScores(games)[0];
   facts.push(`The highest score ever is ${hi.score} by ${name(hi.manager)} (${hi.season}, week ${hi.week}).`);
   const lo = lowestScores(games)[0];
@@ -190,8 +206,8 @@ export function didYouKnowFacts(games, name = (id) => id) {
 }
 
 /** Pick n distinct facts using rng() in [0, 1). */
-export function didYouKnow(games, n = 3, rng = Math.random, name) {
-  const facts = didYouKnowFacts(games, name);
+export function didYouKnow(games, n = 3, rng = Math.random, name, seasons = []) {
+  const facts = didYouKnowFacts(games, name, seasons);
   const picked = [];
   while (picked.length < n && facts.length) picked.push(facts.splice(Math.floor(rng() * facts.length), 1)[0]);
   return picked;

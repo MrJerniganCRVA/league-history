@@ -94,6 +94,17 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
 .tile span { color: var(--muted); font-size: .92rem; }
 @media (min-width: 700px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
 table.champs th[scope="row"] { font-variant-numeric: tabular-nums; }
+/* phones: each season becomes a small labelled block instead of a wide row */
+@media (max-width: 599px) {
+  table.champs thead { display: none; }
+  table.champs, table.champs tbody, table.champs tr { display: block; }
+  table.champs tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  table.champs th[scope="row"] { display: block; border: 0; padding: 0 0 2px; font-size: 1.05rem; }
+  table.champs td {
+    display: grid; grid-template-columns: 8.5rem 1fr; gap: 8px; border: 0; padding: 2px 0; white-space: normal;
+  }
+  table.champs td::before { content: attr(data-label); color: var(--muted); font-size: .85rem; }
+}
 
 /* filters */
 .filters {
