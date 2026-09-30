@@ -1,0 +1,112 @@
+[
+ {
+  "season": 2021,
+  "week": 1,
+  "platform": "yahoo",
+  "game_type": "regular",
+  "team_a": "A",
+  "score_a": 100,
+  "team_b": "B",
+  "score_b": 90,
+  "winner": "A"
+ },
+ {
+  "season": 2021,
+  "week": 1,
+  "platform": "yahoo",
+  "game_type": "regular",
+  "team_a": "C",
+  "score_a": 80,
+  "team_b": "D",
+  "score_b": 80,
+  "winner": "tie"
+ },
+ {
+  "season": 2021,
+  "week": 2,
+  "platform": "yahoo",
+  "game_type": "regular",
+  "team_a": "A",
+  "score_a": 70,
+  "team_b": "C",
+  "score_b": 120,
+  "winner": "C"
+ },
+ {
+  "season": 2021,
+  "week": 2,
+  "platform": "yahoo",
+  "game_type": "regular",
+  "team_a": "B",
+  "score_a": 60,
+  "team_b": "D",
+  "score_b": 65,
+  "winner": "D"
+ },
+ {
+  "season": 2021,
+  "week": 3,
+  "platform": "yahoo",
+  "game_type": "playoff",
+  "team_a": "A",
+  "score_a": 110,
+  "team_b": "D",
+  "score_b": 100,
+  "winner": "A"
+ },
+ {
+  "season": 2021,
+  "week": 3,
+  "platform": "yahoo",
+  "game_type": "consolation",
+  "team_a": "B",
+  "score_a": 150,
+  "team_b": "C",
+  "score_b": 50,
+  "winner": "B"
+ },
+ {
+  "season": 2022,
+  "week": 1,
+  "platform": "sleeper",
+  "game_type": "regular",
+  "team_a": "A",
+  "score_a": 95,
+  "team_b": "B",
+  "score_b": 100,
+  "winner": "B"
+ },
+ {
+  "season": 2022,
+  "week": 1,
+  "platform": "sleeper",
+  "game_type": "regular",
+  "team_a": "C",
+  "score_a": 130,
+  "team_b": "D",
+  "score_b": 40,
+  "winner": "C"
+ },
+ {
+  "season": 2022,
+  "week": 2,
+  "platform": "sleeper",
+  "game_type": "regular",
+  "team_a": "B",
+  "score_a": 85,
+  "team_b": "A",
+  "score_b": 99,
+  "winner": "A"
+ },
+ {
+  "season": 2022,
+  "week": 2,
+  "platform": "sleeper",
+  "game_type": "playoff",
+  "team_a": "C",
+  "score_a": 101,
+  "team_b": "A",
+  "score_b": 100,
+  "winner": "C"
+ }
+]

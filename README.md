@@ -1,52 +1,70 @@
 # league-history
 
-All-time records and head-to-head history for **Ardi's Bad Trade Bazaar and Emporium**:
-Yahoo seasons (2016–2020) plus Sleeper seasons (2021 onward). The site is a static page in `/docs`,
-served by GitHub Pages, and it only reads JSON that the Python scripts in `/scripts` generate.
+All-time records and head-to-head history for **Ardi's Bad Trade Bazaar and Emporium**.
+The site is plain HTML/CSS/JS in `/docs`, served by GitHub Pages. It makes no API calls:
+it only reads the JSON in `docs/data/`, which the Python scripts in `/scripts` generate.
+
+- **Sleeper (2021 onward):** live. Refreshed weekly by a GitHub Action.
+- **Yahoo (2016–2020):** deferred. The Yahoo API refuses our requests (see [Yahoo](#yahoo-deferred)).
+  As soon as `data_raw/yahoo/<season>.json` files exist, the build includes them automatically.
+
+## Pages
+
+| Page | What's on it |
+|---|---|
+| `index.html` | Champions and last place by year, 3 random "did you know" facts |
+| `records.html` | Highest/lowest scores (all-time, by season, by manager), blowouts, closest games, highest score in a loss, lowest in a win, weekly-low counts, season points for/against |
+| `h2h.html` | Everyone's record against everyone; tap a cell for the rivalry |
+| `rivalry.html?a=<id>&b=<id>` | Series record, playoff record, points, average margin, biggest wins, streak, full game log |
+
+Every page shares the same filters (season range, platform, game type), which are kept in the URL,
+so a filtered view can be shared in the group chat. The default is all seasons, regular + playoff games
+(consolation excluded).
 
 ## Setup
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate    # required on Raspberry Pi OS / Debian
 pip install -r requirements.txt
 ```
 
-League IDs and the site title are in `config.json`.
+League IDs, the site title and any manual result corrections are in `config.json`:
+- `champion_overrides` / `last_place_overrides`: `{"2023": "manager_id"}` to correct a season's result.
+- Last place otherwise comes from the worst regular-season record (fewest points breaks ties),
+  or Yahoo's final standings for Yahoo seasons.
 
-## Sleeper (Phase 1)
+## Update the data and site
 
 ```bash
-python scripts/sleeper_fetch.py     # walk previous_league_id and cache raw responses in data_raw/sleeper/
-python scripts/sanity_report.py     # games/managers per season, unmapped users, missing weeks, champions
+python scripts/sleeper_fetch.py     # cache Sleeper responses in data_raw/sleeper/ (only the current season is re-fetched)
+python scripts/build_games.py       # write docs/data/{games,seasons,managers}.json and print the sanity report
 ```
 
-- Completed seasons get a `_complete` marker and are never fetched again. Only the in-progress season is re-fetched. Use `--force` to re-fetch everything.
-- Any Sleeper user who isn't in `managers.json` is listed as **unmapped** in the report. Their games are kept, never dropped.
+The report lists games and managers per season, unmapped identities, missing weeks and missing champions.
+Unmapped people's games are kept, never dropped.
 
-## Yahoo (Phase 2): one-time export, run locally
+**Automatic refresh:** `.github/workflows/refresh.yml` runs every Tuesday from September to January
+(and on demand from the Actions tab). It fetches the current Sleeper season, rebuilds, and commits only if
+the data changed.
 
-1. Create an app at https://developer.yahoo.com/apps/ with the API permission **Fantasy Sports → Read** and the redirect URI `oob`.
-2. Create a `.env` file in the repo root. It's gitignored, so it never gets committed:
-   ```
-   YAHOO_CONSUMER_KEY=your_key
-   YAHOO_CONSUMER_SECRET=your_secret
-   ```
-3. Run the export:
-   ```bash
-   python scripts/yahoo_export.py          # every season in config.json (2016-2020)
-   python scripts/yahoo_export.py 2018     # or specific seasons
-   ```
-   - The first run prints an **AUTHORIZATION URL**. Open it on any device, approve access, then paste the code back into the terminal.
-   - The token is saved to `yahoo_token.json` (gitignored), so later runs don't ask again.
-   - The 2016 and 2017 league IDs are found automatically by following Yahoo's `renew` links and written to `config.json`.
-4. Commit `data_raw/yahoo/*.json` and `config.json`. The script ends by listing any Yahoo team that isn't in `manager_map.csv`.
+## Preview locally
+
+```bash
+python -m http.server -d docs 8000   # then open http://localhost:8000
+```
+
+## Publish on GitHub Pages (one time)
+
+1. Merge to `main`.
+2. Repo **Settings → Pages → Build and deployment**: Source **Deploy from a branch**, Branch **main**, Folder **/docs**, then Save.
+3. The site appears at `https://<your-user>.github.io/league-history/` within a minute or two.
+4. **Settings → Actions → General → Workflow permissions**: make sure **Read and write** is selected so the weekly refresh can commit.
 
 ## Managers (identity map)
 
 `manager_map.csv` has one row per person. The first column is their Sleeper username, and each year column
 is their Yahoo team name for that season. Leave a cell blank if they weren't in the league that year.
-Two optional extras:
-- A `DisplayName` column overrides the name shown on the site.
+- An optional `DisplayName` column overrides the name shown on the site.
 - For someone who never played on Sleeper, leave the first column blank and fill in `DisplayName`.
 
 ```bash
@@ -54,10 +72,28 @@ python scripts/import_manager_map.py      # regenerates managers.json and keeps 
 ```
 
 Each row is exactly one person, even if a newcomer took over someone's old team slot or team name.
-Any team that isn't in the CSV is reported as unmapped and kept in the data, never guessed.
+
+## Yahoo (deferred)
+
+`scripts/yahoo_export.py` is written and tested, but Yahoo refuses every request, including
+"who am I" (`This application is not authorized to perform this action`), with two different apps.
+Options to revisit:
+
+- `python scripts/yahoo_export.py --diagnose` with a fresh Yahoo app. It prints OK/FAIL per request.
+- A browser-console script that reads the weekly matchup pages while you're logged in to Yahoo.
+- A hand-filled CSV of matchups (about 400 rows).
+
+Each one just needs to produce `data_raw/yahoo/<season>.json`. After that, `build_games.py` includes the
+seasons and `manager_map.csv` already maps the team names. The five league IDs are in `config.json`.
+
+Export setup, if you try the API again: create an app at https://developer.yahoo.com/apps/
+(**Fantasy Sports → Read**, Confidential client, redirect URI `oob`). Put the keys in `.env`
+(`YAHOO_CONSUMER_KEY=...`, `YAHOO_CONSUMER_SECRET=...`, no quotes needed), then run
+`python scripts/yahoo_export.py`. `.env` and `yahoo_token.json` are gitignored.
 
 ## Tests
 
 ```bash
-python -m unittest discover tests
+python -m unittest discover tests     # data pipeline
+node --test tests/*.test.mjs          # record calculations in docs/js/stats.js
 ```
