@@ -40,11 +40,36 @@ def _playoff_pairs(league: dict, winners_bracket: list[dict]) -> dict[int, set[f
     return pairs
 
 
+def _sacko_roster(season_dir: Path, league: dict, losers_bracket: list[dict]) -> int | None:
+    """Roster that lost the loser-bracket (toilet bowl) final.
+
+    In a toilet bowl the loser advances, and Sleeper marks that team `w`. So instead of
+    trusting the labels, compare the two teams' actual scores in the final's week; the bracket
+    label only breaks an exact tie.
+    """
+    final = next((m for m in losers_bracket if m.get("p") == 1
+                  and m.get("t1") is not None and m.get("t2") is not None), None)
+    if not final:
+        return None
+    rounds = playoff_rounds(league, losers_bracket)
+    weeks = round_weeks(league, rounds).get(final.get("r", rounds), [])
+    t1, t2 = int(final["t1"]), int(final["t2"])
+    totals = {t1: 0.0, t2: 0.0}
+    for week in weeks:
+        for e in read_json(season_dir / "matchups" / f"{week:02d}.json", []) or []:
+            if e.get("roster_id") in totals:
+                totals[e["roster_id"]] += _score(e)
+    if totals[t1] != totals[t2]:
+        return t1 if totals[t1] < totals[t2] else t2
+    return int(final["w"]) if final.get("w") is not None else None
+
+
 def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list[dict], dict, list[str]]:
     league = read_json(season_dir / "league.json")
     users = read_json(season_dir / "users.json", []) or []
     rosters = read_json(season_dir / "rosters.json", []) or []
     wb = read_json(season_dir / "winners_bracket.json", []) or []
+    lb = read_json(season_dir / "losers_bracket.json", []) or []
     season = int(league["season"])
     settings = league.get("settings", {})
     playoff_start = int(settings.get("playoff_week_start") or 99)
@@ -102,6 +127,14 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
     elif complete:
         issues.append("no championship result in winners_bracket")
 
+    sacko = None
+    if complete:
+        roster = _sacko_roster(season_dir, league, lb)
+        if roster is None:
+            issues.append("no finished loser-bracket final; Sacko unknown")
+        else:
+            sacko = who(roster)
+
     meta = {
         "season": season,
         "platform": "sleeper",
@@ -111,7 +144,8 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
         "regular_weeks": max(0, playoff_start - 1) if playoff_start != 99 else None,
         "playoff_start_week": playoff_start if playoff_start != 99 else None,
         "champion": champion,
-        "last_place": None,  # derived from standings in build_games (with overrides)
+        "sacko": sacko,
+        "last_place_regular": None,  # derived from standings in build_games (with overrides)
         "missing_weeks": missing_weeks,
     }
     return games, meta, issues

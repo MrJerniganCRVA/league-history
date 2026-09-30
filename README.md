@@ -12,7 +12,7 @@ it only reads the JSON in `docs/data/`, which the Python scripts in `/scripts` g
 
 | Page | What's on it |
 |---|---|
-| `index.html` | Champions and last place by year, 3 random "did you know" facts |
+| `index.html` | Champion, Sacko and regular-season last place by year, 3 random "did you know" facts |
 | `records.html` | Highest/lowest scores (all-time, by season, by manager), blowouts, closest games, highest score in a loss, lowest in a win, weekly-low counts, season points for/against |
 | `h2h.html` | Everyone's record against everyone; tap a cell for the rivalry |
 | `rivalry.html?a=<id>&b=<id>` | Series record, playoff record, points, average margin, biggest wins, streak, full game log |
@@ -28,10 +28,17 @@ python3 -m venv .venv && source .venv/bin/activate    # required on Raspberry Pi
 pip install -r requirements.txt
 ```
 
-League IDs, the site title and any manual result corrections are in `config.json`:
-- `champion_overrides` / `last_place_overrides`: `{"2023": "manager_id"}` to correct a season's result.
-- Last place otherwise comes from the worst regular-season record (fewest points breaks ties),
-  or Yahoo's final standings for Yahoo seasons.
+League IDs, the site title and any manual result corrections are in `config.json`.
+
+Each season shows three results:
+- **Champion:** winner of the championship game.
+- **Sacko:** loser of the loser-bracket (toilet bowl) final. Sleeper marks the team that *advances* in
+  the loser bracket, which there is the team that lost. So the build compares the actual scores in the
+  final and picks the lower one. For Yahoo seasons it's the last team in the final standings.
+- **Last (reg. season):** worst regular-season record, with fewest points breaking ties.
+
+To correct any of them, add `{"2023": "manager_id"}` to `champion_overrides`, `sacko_overrides` or
+`last_place_overrides`.
 
 ## Update the data and site
 
