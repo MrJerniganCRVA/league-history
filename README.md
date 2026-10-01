@@ -5,7 +5,7 @@ The site is plain HTML/CSS/JS in `/docs`, served by GitHub Pages. It makes no AP
 it only reads the JSON in `docs/data/`, which the Python scripts in `/scripts` generate.
 
 - **Sleeper (2021 onward):** live. Refreshed weekly by a GitHub Action.
-- **Yahoo (2016–2020):** deferred. The Yahoo API refuses our requests (see [Yahoo](#yahoo-deferred)).
+- **Yahoo (2016–2020):** one-time local export (see [Yahoo](#yahoo-20162020-one-time-export)).
   As soon as `data_raw/yahoo/<season>.json` files exist, the build includes them automatically.
 
 ## Pages
@@ -80,23 +80,30 @@ python scripts/import_manager_map.py      # regenerates managers.json and keeps 
 
 Each row is exactly one person, even if a newcomer took over someone's old team slot or team name.
 
-## Yahoo (deferred)
+## Yahoo (2016–2020): one-time export
 
-`scripts/yahoo_export.py` is written and tested, but Yahoo refuses every request, including
-"who am I" (`This application is not authorized to perform this action`), with two different apps.
-Options to revisit:
+The export signs in to Yahoo itself, using your app's real redirect URI and an explicit request
+for fantasy read access (`scope=fspt-r`). YFPY's built-in sign-in used `oob` and never asked for
+that access, which is why every request used to fail with "not authorized".
 
-- `python scripts/yahoo_export.py --diagnose` with a fresh Yahoo app. It prints OK/FAIL per request.
-- A browser-console script that reads the weekly matchup pages while you're logged in to Yahoo.
-- A hand-filled CSV of matchups (about 400 rows).
-
-Each one just needs to produce `data_raw/yahoo/<season>.json`. After that, `build_games.py` includes the
-seasons and `manager_map.csv` already maps the team names. The five league IDs are in `config.json`.
-
-Export setup, if you try the API again: create an app at https://developer.yahoo.com/apps/
-(**Fantasy Sports → Read**, Confidential client, redirect URI `oob`). Put the keys in `.env`
-(`YAHOO_CONSUMER_KEY=...`, `YAHOO_CONSUMER_SECRET=...`, no quotes needed), then run
-`python scripts/yahoo_export.py`. `.env` and `yahoo_token.json` are gitignored.
+1. Yahoo app at https://developer.yahoo.com/apps/: **Fantasy Sports → Read**, Confidential client.
+2. `.env` in the repo root (gitignored, no quotes needed):
+   ```
+   YAHOO_CONSUMER_KEY=dj0y...            # Client ID
+   YAHOO_CONSUMER_SECRET=...             # Client Secret
+   YAHOO_REDIRECT_URI=https://localhost:8080   # exactly as on the app page
+   ```
+3. Check access, then export:
+   ```bash
+   python scripts/yahoo_export.py --diagnose   # OK/FAIL per request, writes no league data
+   python scripts/yahoo_export.py              # all seasons in config.json
+   ```
+   The first run prints a sign-in link. Approve it. The browser then lands on
+   `https://localhost:8080/?code=...` and shows an error page, which is expected. Copy that whole
+   address and paste it into the terminal. The token is saved to `yahoo_token.json` (gitignored)
+   and refreshed automatically after that.
+4. Commit `data_raw/yahoo/*.json` and `config.json`, then run `python scripts/build_games.py`.
+   The script ends by listing any Yahoo team that isn't in `manager_map.csv`.
 
 ## Tests
 
