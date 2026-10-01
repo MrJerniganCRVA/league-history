@@ -1,16 +1,19 @@
 """ONE-TIME Yahoo export (run locally, e.g. on the Pi). The site and the GitHub Action never call Yahoo.
 
 Setup:
-  1. Create an app at https://developer.yahoo.com/apps/  (API permissions: Fantasy Sports -> Read,
-     redirect URI: oob). Put its keys in .env at the repo root:
-         YAHOO_CONSUMER_KEY=...
-         YAHOO_CONSUMER_SECRET=...
+  1. Yahoo app at https://developer.yahoo.com/apps/ (API permissions: Fantasy Sports -> Read,
+     Confidential client). Put its values in .env at the repo root:
+         YAHOO_CONSUMER_KEY=...        (Client ID, starts with dj0y)
+         YAHOO_CONSUMER_SECRET=...     (Client Secret)
+         YAHOO_REDIRECT_URI=https://localhost:8080   (must match the app's Redirect URI exactly)
   2. pip install -r requirements.txt
-  3. python scripts/yahoo_export.py            (all seasons in config.json)
-     python scripts/yahoo_export.py 2018 2019  (just these)
+  3. python scripts/yahoo_export.py --diagnose  (check access first)
+     python scripts/yahoo_export.py             (all seasons in config.json)
+     python scripts/yahoo_export.py 2018 2019   (just these)
 
-First run prints an AUTHORIZATION URL: open it on any device, approve, paste the code back.
-The token is saved to yahoo_token.json (gitignored) so later runs don't ask again.
+First run prints a sign-in link. Open it, approve, and paste back the address-bar URL the browser
+lands on (https://localhost:8080/?code=...; the page itself won't load, that's expected).
+The token is saved to yahoo_token.json (gitignored) and refreshed automatically afterwards.
 
 Writes data_raw/yahoo/<season>.json and fills missing league IDs (found via the `renew` chain)
 into config.json.
@@ -18,13 +21,24 @@ into config.json.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
+import os
 import sys
+import time
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from common import CONFIG_PATH, MANAGER_MAP_CSV, ROOT, YAHOO_RAW, load_config, write_json
 
 TOKEN_PATH = ROOT / "yahoo_token.json"
+AUTH_URL = "https://api.login.yahoo.com/oauth2/request_auth"
+TOKEN_URL = "https://api.login.yahoo.com/oauth2/get_token"
+DEFAULT_REDIRECT_URI = "https://localhost:8080"
+SCOPE = "fspt-r"           # Fantasy Sports read. Asked for explicitly; YFPY's own sign-in never did.
+# Yahoo access tokens last 60 minutes. Refresh a saved one if it's more than a few minutes old so a
+# full run never reaches YFPY's own refresh (which would use the wrong redirect URI).
+REFRESH_AFTER = 5 * 60
 
 # Yahoo NFL game keys are fixed per season. Using these avoids the /games lookup, which Yahoo
 # rejects ("not authorized") for some older seasons.
@@ -80,47 +94,123 @@ def tag_game_types(games: list[dict], playoff_start: int, seeds: dict[str, int],
 
 NOT_AUTHORIZED_HELP = """
 Yahoo refused the request: "This application is not authorized to perform this action."
-The saved token has been deleted. Fix the app, then re-run (you'll get a fresh sign-in link):
-  1. https://developer.yahoo.com/apps/ -> your app -> API Permissions: tick Fantasy Sports, choose Read.
-     Client type: Confidential. If permissions can't be edited, create a new app and put its
-     key/secret in .env.
-  2. Make sure .env has the key/secret of THAT app (YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET).
+The saved token has been deleted. Signing in worked, but Yahoo won't give this app fantasy data.
+  1. Check the app at https://developer.yahoo.com/apps/ : Fantasy Sports -> Read, Confidential client.
+  2. Re-run; you'll get a fresh sign-in link.
+If it still fails, the API route is blocked for this app; tell Claude and we'll use the website export.
 """
 
 
-def _load_token(consumer_key: str | None) -> dict | None:
-    """Reuse the saved token only if it belongs to the app currently in .env.
+# ---------------------------------------------------------------- sign-in (pure helpers, unit tested)
 
-    YFPY prefers the key stored in the token over .env, so a token from an old app would
-    silently keep being used after you switch apps.
-    """
-    if not TOKEN_PATH.exists():
-        return None
-    token = json.loads(TOKEN_PATH.read_text())
-    if consumer_key and token.get("consumer_key") != consumer_key:
-        print("Saved Yahoo token is for a different app than .env; signing in again.")
-        TOKEN_PATH.unlink()
-        return None
-    return token
+def auth_url(client_id: str, redirect_uri: str) -> str:
+    return AUTH_URL + "?" + urlencode({"client_id": client_id, "redirect_uri": redirect_uri,
+                                      "response_type": "code", "scope": SCOPE})
+
+
+def extract_code(text: str) -> str:
+    """Accept the whole address-bar URL (https://localhost:8080/?code=...) or just the code."""
+    text = text.strip()
+    if "code=" in text:
+        query = urlparse(text).query or text.split("?", 1)[-1]
+        return parse_qs(query).get("code", [""])[0].strip()
+    return text
+
+
+def token_record(resp: dict, key: str, secret: str, now: float | None = None) -> dict:
+    """Yahoo's token response -> the token JSON YFPY accepts (so YFPY never runs its own sign-in)."""
+    return {
+        "access_token": resp["access_token"],
+        "refresh_token": resp.get("refresh_token"),
+        "token_type": resp.get("token_type", "bearer"),
+        "token_time": now if now is not None else time.time(),
+        "guid": resp.get("xoauth_yahoo_guid"),
+        "consumer_key": key,
+        "consumer_secret": secret,
+    }
+
+
+def request_token(post, key: str, secret: str, data: dict) -> dict:
+    """POST to Yahoo's token endpoint. Tries the key/secret as a Basic header first, then in the
+    body (Yahoo apps differ on which they accept). `post` is requests.post (injectable for tests)."""
+    basic = base64.b64encode(f"{key}:{secret}".encode()).decode()
+    attempts = [
+        ({"Authorization": f"Basic {basic}"}, data),
+        ({}, {**data, "client_id": key, "client_secret": secret}),
+    ]
+    errors = []
+    for headers, body in attempts:
+        r = post(TOKEN_URL, headers=headers, data=body, timeout=30)
+        try:
+            payload = r.json()
+        except ValueError:
+            payload = {"error": f"HTTP {r.status_code}", "error_description": r.text[:200]}
+        if payload.get("access_token"):
+            return payload
+        errors.append(f"{payload.get('error')}: {payload.get('error_description', '')}".strip())
+    raise SystemExit("Yahoo did not issue a token:\n  " + "\n  ".join(errors) + """
+Common causes:
+  - the code expired (a few minutes) or was already used -> run again for a new link
+  - YAHOO_REDIRECT_URI in .env doesn't match the app's Redirect URI exactly
+  - YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET are not this app's Client ID / Client Secret""")
+
+
+def sign_in(post, key: str, secret: str, redirect_uri: str, ask=input) -> dict:
+    print("\nSign in to Yahoo (one time):")
+    print("  1. Open this link in a browser and click Agree:\n")
+    print(f"     {auth_url(key, redirect_uri)}\n")
+    print(f"  2. The browser then tries to open {redirect_uri}/?code=... and shows an error page.")
+    print("     That's expected. Copy the whole address from the address bar.")
+    code = extract_code(ask("  3. Paste it here and press Enter: "))
+    if not code:
+        raise SystemExit("No code found in what you pasted. Run again for a new link.")
+    resp = request_token(post, key, secret, {"grant_type": "authorization_code",
+                                             "redirect_uri": redirect_uri, "code": code})
+    return token_record(resp, key, secret)
+
+
+def load_or_refresh_token(post, key: str, secret: str, redirect_uri: str, ask=input) -> tuple[dict, str]:
+    """Saved token if it belongs to this app (refreshed when old), else a new sign-in."""
+    if TOKEN_PATH.exists():
+        tok = json.loads(TOKEN_PATH.read_text())
+        if tok.get("consumer_key") != key:
+            print("Saved Yahoo token is for a different app than .env; signing in again.")
+        elif time.time() - float(tok.get("token_time") or 0) < REFRESH_AFTER:
+            return tok, "saved sign-in"
+        elif tok.get("refresh_token"):
+            try:
+                resp = request_token(post, key, secret, {"grant_type": "refresh_token",
+                                                         "redirect_uri": redirect_uri,
+                                                         "refresh_token": tok["refresh_token"]})
+                resp.setdefault("refresh_token", tok["refresh_token"])
+                resp.setdefault("xoauth_yahoo_guid", tok.get("guid"))
+                return token_record(resp, key, secret), "refreshed sign-in"
+            except SystemExit:
+                print("Couldn't refresh the saved Yahoo token; signing in again.")
+        TOKEN_PATH.unlink(missing_ok=True)
+    return sign_in(post, key, secret, redirect_uri, ask), "new sign-in"
 
 
 def make_query():
-    import os
-
+    import requests
     from dotenv import load_dotenv
     from yfpy.query import YahooFantasySportsQuery
 
     load_dotenv(ROOT / ".env", override=True)
-    key = os.environ.get("YAHOO_CONSUMER_KEY")
-    if not key or not os.environ.get("YAHOO_CONSUMER_SECRET"):
+    key = (os.environ.get("YAHOO_CONSUMER_KEY") or "").strip()
+    secret = (os.environ.get("YAHOO_CONSUMER_SECRET") or "").strip()
+    redirect_uri = (os.environ.get("YAHOO_REDIRECT_URI") or DEFAULT_REDIRECT_URI).strip()
+    if not key or not secret:
         raise SystemExit("Missing YAHOO_CONSUMER_KEY / YAHOO_CONSUMER_SECRET in .env")
+    token, how = load_or_refresh_token(requests.post, key, secret, redirect_uri)
+    # The token is fresh, so YFPY uses it as-is and never starts its own (oob) sign-in.
     q = YahooFantasySportsQuery(
         league_id="0", game_code="nfl",
-        yahoo_access_token_json=_load_token(key),
-        browser_callback=False,  # print the auth URL instead of opening a browser (headless Pi)
+        yahoo_access_token_json=token,
+        env_var_fallback=False,
+        browser_callback=False,
     )
-    print(f"Using Yahoo app key ...{key[-6:]} "
-          f"({'saved sign-in' if TOKEN_PATH.exists() else 'new sign-in'})")
+    print(f"Using Yahoo app key ...{key[-6:]} ({how}), redirect {redirect_uri}")
     return q
 
 
