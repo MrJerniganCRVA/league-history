@@ -482,5 +482,11 @@
 {"season": 2026, "week": 3, "platform": "sleeper", "game_type": "regular", "team_a": "ryanlboysboys", "score_a": 99.64, "team_b": "drinkinurbeers", "score_b": 117.38, "winner": "drinkinurbeers"},
 {"season": 2026, "week": 3, "platform": "sleeper", "game_type": "regular", "team_a": "sackodeeznutz", "score_a": 38.46, "team_b": "ovisnipes", "score_b": 76.34, "winner": "ovisnipes"},
 {"season": 2026, "week": 3, "platform": "sleeper", "game_type": "regular", "team_a": "shoetouch", "score_a": 98.18, "team_b": "propersian93", "score_b": 83.68, "winner": "shoetouch"},
-{"season": 2026, "week": 3, "platform": "sleeper", "game_type": "regular", "team_a": "stretcharmstrong92", "score_a": 85.92, "team_b": "kempsucks421", "score_b": 105.34, "winner": "kempsucks421"}
+{"season": 2026, "week": 3, "platform": "sleeper", "game_type": "regular", "team_a": "stretcharmstrong92", "score_a": 85.92, "team_b": "kempsucks421", "score_b": 105.34, "winner": "kempsucks421"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "dinkleburg", "score_a": 95.68, "team_b": "propersian93", "score_b": 108.26, "winner": "propersian93"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "kempsucks421", "score_a": 101.8, "team_b": "kempbartlett", "score_b": 92.74, "winner": "kempsucks421"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "oriontheblacksmith", "score_a": 123.12, "team_b": "drinkinurbeers", "score_b": 85.92, "winner": "oriontheblacksmith"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "ovisnipes", "score_a": 91.2, "team_b": "jswanberg", "score_b": 72.78, "winner": "ovisnipes"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "ryanlboysboys", "score_a": 92.28, "team_b": "stretcharmstrong92", "score_b": 81.72, "winner": "ryanlboysboys"},
+{"season": 2026, "week": 4, "platform": "sleeper", "game_type": "regular", "team_a": "sackodeeznutz", "score_a": 105.86, "team_b": "shoetouch", "score_b": 80.98, "winner": "sackodeeznutz"}
 ]
