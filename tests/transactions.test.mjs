@@ -86,3 +86,12 @@ test('topTrades and topPickups follow the filters', () => {
   assert.deepEqual(T.topPickups(SCORED, f).map((r) => r.tx.id), ['w1', 'w2']);
   assert.deepEqual(T.topPickups(SCORED, { ...f, season: 2024 }), []);
 });
+
+test('gotGave lists players, picks and FAAB both ways, minus roster-room drops', () => {
+  const t = tx('g', 2026, 1, 'trade', [
+    side('A', [], ['p1', 'p9'], { faab_in: 11, picks_out: [{ season: 2027, round: 2 }] }),
+    side('B', ['p1'], [], { faab_out: 11, picks_in: [{ season: 2027, round: 2 }] }),
+  ]);
+  assert.deepEqual(T.gotGave(t.sides[0], t), { got: [{ faab: 11 }], gave: [{ player: 'p1' }, { pick: { season: 2027, round: 2 } }] });
+  assert.deepEqual(T.gotGave(t.sides[1], t), { got: [{ player: 'p1' }, { pick: { season: 2027, round: 2 } }], gave: [{ faab: 11 }] });
+});

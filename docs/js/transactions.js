@@ -19,6 +19,23 @@ export function extraDrops(side, tx) {
 }
 
 /**
+ * What one team got and gave in a trade, as display items:
+ * {player: id} | {pick: {season, round, original}} | {faab: amount}.
+ * Roster-room releases (extraDrops) aren't "given" to anyone, so they're left out of `gave`.
+ */
+export function gotGave(side, tx) {
+  const released = new Set(extraDrops(side, tx));
+  return {
+    got: [...side.adds.map((p) => ({ player: p })),
+      ...(side.picks_in || []).map((k) => ({ pick: k })),
+      ...(side.faab_in ? [{ faab: side.faab_in }] : [])],
+    gave: [...side.drops.filter((p) => !released.has(p)).map((p) => ({ player: p })),
+      ...(side.picks_out || []).map((k) => ({ pick: k })),
+      ...(side.faab_out ? [{ faab: side.faab_out }] : [])],
+  };
+}
+
+/**
  * One row per (transaction, team) matching the filters, oldest first.
  * f = { manager: id | 'all', season: number | 'all', kinds: Set of KINDS keys }
  */

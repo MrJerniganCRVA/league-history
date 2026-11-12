@@ -156,10 +156,20 @@ boot('Transactions', async (data) => {
       </section>`;
     const ptsCol = (key, label) => ({ key, label, num: true, format: (v) => `<span class="${tone(v)}">${signed(v)}</span>` });
     const winCol = (key, label) => ({ key, label, num: true, format: (v) => `<span class="${tone(v)}">${signed(v, v % 1 ? 1 : 0)}</span>` });
-    const names = (s) => esc(s.adds.map((p) => players[p]?.name ?? p).join(', ') || 'picks/FAAB');
-    const moveText = (m) => (m ? `<span class="move">${m.tx.season} wk ${m.tx.week}: ${names(m.side)} <span class="${tone(m.side.pts)}">(${signed(m.side.pts)})</span></span>` : '—');
+    const itemText = (it) => (it.player ? esc(players[it.player]?.name ?? it.player)
+      : it.pick ? `${it.pick.season} rd ${it.pick.round} pick` : `$${it.faab} FAAB`);
+    const itemsText = (items) => items.map(itemText).join(', ') || 'nothing';
+    const names = (s) => esc(s.adds.map((p) => players[p]?.name ?? p).join(', ') || 'nothing');
+    const pts = (m) => `<span class="${tone(m.side.pts)}">(${signed(m.side.pts)})</span>`;
+    const moveText = (m) => (m ? `<span class="move">${m.tx.season} wk ${m.tx.week}: ${names(m.side)} ${pts(m)}</span>` : '—');
+    const tradeText = (m) => {
+      if (!m) return '—';
+      const { got, gave } = T.gotGave(m.side, m.tx);
+      return `<span class="move">${m.tx.season} wk ${m.tx.week} ${pts(m)}<br>`
+        + `<span class="muted">Got</span> ${itemsText(got)}<br><span class="muted">Gave</span> ${itemsText(gave)}</span>`;
+    };
     const managerCol = { key: 'manager', label: 'Team', format: (v) => `<a href="?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(T.stateToQuery(st))), m: v })}" data-m="${esc(v)}">${who(v)}</a>`, sort: (r) => data.name(r.manager) };
-    const moveCol = (key, label) => ({ key, label, format: moveText, sort: (r) => r[key]?.side.pts ?? 0 });
+    const moveCol = (key, label, format = moveText) => ({ key, label, format, sort: (r) => r[key]?.side.pts ?? 0 });
     renderTable(document.getElementById('summary'), {
       rows: summary.filter((r) => r.trades).sort((a, b) => b.tradePts - a.tradePts),
       pageSize: 20,
@@ -169,8 +179,8 @@ boot('Transactions', async (data) => {
         { key: 'trades', label: 'Trades', num: true },
         ptsCol('tradePts', 'Trade pts'),
         winCol('tradeWins', 'Trade W'),
-        moveCol('bestTrade', 'Best trade'),
-        moveCol('worstTrade', 'Worst trade'),
+        moveCol('bestTrade', 'Best trade', tradeText),
+        moveCol('worstTrade', 'Worst trade', tradeText),
       ],
     });
     renderTable(document.getElementById('pickup-summary'), {
@@ -190,7 +200,7 @@ boot('Transactions', async (data) => {
     renderTable(document.getElementById('top-trades'), {
       rows: T.topTrades(transactions, st).map(({ tx, v }) => ({
         season: tx.season, week: tx.week, winner: v.winner, loser: v.loser, margin: v.margin, swing: v.winSwing,
-        wGot: names(v.sides[0]), lGot: names(v.sides[1]),
+        wGot: itemsText(T.gotGave(v.sides[0], tx).got), lGot: itemsText(T.gotGave(v.sides[1], tx).got),
       })),
       pageSize: 10,
       empty: 'No scored trades match these filters.',
