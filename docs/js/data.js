@@ -24,6 +24,19 @@ export async function loadData() {
   return cache;
 }
 
+let txCache;
+
+/** Transactions page data, loaded only on that page (it's the biggest file). */
+export function loadTransactions() {
+  if (!txCache) {
+    txCache = fetch('./data/transactions.json').then((r) => {
+      if (!r.ok) throw new Error(`Could not load data/transactions.json (${r.status})`);
+      return r.json();
+    });
+  }
+  return txCache;
+}
+
 /** Manager name with a "(former)" tag for people no longer in the league. */
 export function managerLabel(data, id) {
   const m = data.byId.get(id);

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transactions · League History</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/pages/transactions.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" data-keep-filters><span aria-hidden="true">🏈</span> <span data-site-title>League History</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html" data-keep-filters>Home</a>
+      <a href="records.html" data-keep-filters>Records</a>
+      <a href="h2h.html" data-keep-filters>Head-to-head</a>
+      <a href="rivalry.html" data-keep-filters>Rivalry</a>
+      <a href="transactions.html" aria-current="page">Transactions</a>
+    </nav>
+  </header>
+  <main>
+  <h1>Transactions</h1>
+  <p class="desc">Every completed trade, waiver claim, free-agent pickup and drop on Sleeper. Failed waiver claims aren't shown.</p>
+  <form id="tx-filters" class="filters" aria-label="Filters">
+    <label>Team <select name="m"></select></label>
+    <label>Season <select name="season"></select></label>
+    <fieldset class="kinds"><legend>Show</legend>
+      <label><input type="checkbox" name="k-trade"> Trades</label>
+      <label><input type="checkbox" name="k-pickup"> Pickups</label>
+      <label><input type="checkbox" name="k-drop"> Drops</label>
+    </fieldset>
+    <button type="button" class="reset">Reset</button>
+  </form>
+  <div id="transactions"></div>
+  </main>
+  <footer class="site-footer"><span id="footer-note"></span></footer>
+</body>
+</html>
