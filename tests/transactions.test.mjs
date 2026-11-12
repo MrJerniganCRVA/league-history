@@ -95,3 +95,25 @@ test('gotGave lists players, picks and FAAB both ways, minus roster-room drops',
   assert.deepEqual(T.gotGave(t.sides[0], t), { got: [{ faab: 11 }], gave: [{ player: 'p1' }, { pick: { season: 2027, round: 2 } }] });
   assert.deepEqual(T.gotGave(t.sides[1], t), { got: [{ player: 'p1' }, { pick: { season: 2027, round: 2 } }], gave: [{ faab: 11 }] });
 });
+
+test('points per week: verdict, ranking, and the minimum-weeks rule', () => {
+  const t = (id, week, aPts, aN, bPts, bN) => tx(id, 2025, week, 'trade', [
+    side('A', ['x'], ['y'], { pts: aPts, n: aN, wins: 0, po_wins: 0 }),
+    side('B', ['y'], ['x'], { pts: bPts, n: bN, wins: 0, po_wins: 0 })]);
+  const early = t('early', 1, 30, 12, -18, 12); // margin 48 over 12 wks = 4/wk
+  const late = t('late', 11, 20, 4, -20, 4); // margin 40 over 4 wks = 10/wk
+  const blip = t('blip', 14, 15, 1, -15, 1); // 30 in 1 wk: too short to rank per week
+  const v = T.tradeVerdict(late);
+  assert.deepEqual([v.margin, v.weeks, v.marginPerWeek], [40, 4, 10]);
+  const f = { manager: 'all', season: 'all', kinds: all };
+  assert.deepEqual(T.topTrades([early, late, blip], f).map((r) => r.tx.id), ['early', 'late', 'blip']);
+  assert.deepEqual(T.topTrades([early, late, blip], { ...f, rank: 'week' }).map((r) => r.tx.id), ['late', 'early']);
+  const byTotal = T.teamSummary([early, late, blip], 'all').find((r) => r.manager === 'B');
+  const byWeek = T.teamSummary([early, late, blip], 'all', 'week').find((r) => r.manager === 'B');
+  assert.equal(byTotal.worstTrade.tx.id, 'late'); // -20 total beats -18 and -15
+  assert.equal(byWeek.worstTrade.tx.id, 'late'); // -5/wk; blip excluded
+  assert.equal(byWeek.bestTrade.tx.id, 'early');
+  assert.equal(byTotal.tradePerWeek, Math.round((-53 / 17) * 100) / 100);
+  assert.equal(T.readState('?rank=week', { managers: [], seasons: [] }).rank, 'week');
+  assert.equal(T.stateToQuery({ manager: 'all', season: 'all', kinds: all, rank: 'week' }), 'rank=week');
+});

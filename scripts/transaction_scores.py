@@ -130,7 +130,7 @@ class SeasonScorer:
                          for p in adds & self.starters[w].get(rid, set())), 2)
 
     def score(self, tx: dict, stops: dict[str, dict[str, int]] | None = None) -> None:
-        """Adds pts / wins / po_wins / started (and weeks, for trades) to each scored side.
+        """Adds pts / n (weeks scored) / wins / po_wins / started (and weeks, for trades) to each scored side.
         stops: manager -> player -> last week that added player may count (see score_transactions)."""
         stops = stops or {}
         gains = {i: self.side_gains(tx, s, stops.get(s["manager"])) for i, s in enumerate(tx["sides"])}
@@ -145,6 +145,7 @@ class SeasonScorer:
                 opp_gain = (by_manager.get(opp) or {}).get(week, 0.0)
                 wins[gtype] += _result(score, opp_score) - _result(score - gain, opp_score - opp_gain)
             side["pts"] = round(sum(g.values()), 2)
+            side["n"] = len(g)  # weeks scored, for points per week
             side["wins"] = wins["regular"]
             side["po_wins"] = wins["playoff"]
             side["started"] = self.started_points(side, g.keys())
