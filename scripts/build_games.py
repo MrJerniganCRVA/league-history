@@ -16,6 +16,7 @@ from common import (SITE_DATA, SLEEPER_RAW, UNMAPPED_PREFIX, YAHOO_RAW, Resolver
 from sanity_report import print_report
 from sleeper_normalize import normalize_sleeper_season
 from sleeper_transactions import normalize_sleeper_transactions, player_table
+from transaction_scores import score_transactions
 
 
 class BuildError(RuntimeError):
@@ -155,8 +156,10 @@ def write_transactions(resolver: Resolver, sleeper_dir: Path = SLEEPER_RAW,
                        out: Path = SITE_DATA / "transactions.json") -> int:
     """Sleeper only for now. TODO: Yahoo transactions once the Yahoo export can pull them."""
     txs: list[dict] = []
+    raw_players = (read_json(sleeper_dir / "players.json", {}) or {}).get("players") or {}
     for d in sorted(p for p in sleeper_dir.glob("*") if (p / "transactions").is_dir()):
         t, issues = normalize_sleeper_transactions(d, resolver)
+        score_transactions(d, t, resolver, raw_players)
         txs += t
         for i in issues:
             print(f"  transactions {d.name}: {i}")

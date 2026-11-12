@@ -214,3 +214,17 @@ td.none { color: var(--muted); padding: 8px 6px; }
 .trade-side { background: var(--surface-2); border-radius: 8px; padding: 6px 10px; }
 .trade-who { font-weight: 600; font-size: .85rem; }
 @media (max-width: 499px) { .tl-week { grid-template-columns: 1fr; gap: 2px; } }
+.score { font-size: .82rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: 4px; }
+.up { color: rgb(var(--win)); }
+.down { color: rgb(var(--loss)); }
+.flat { color: var(--muted); }
+.po-note { font-weight: 400; color: var(--gold); }
+.verdict { margin: 6px 0 0; font-size: .9rem; }
+.wk-strip { margin-top: 4px; font-size: .85rem; }
+.wk-strip summary { cursor: pointer; color: var(--accent); }
+.wk-strip table { width: auto; font-size: .82rem; }
+.wk-strip td, .wk-strip th { padding: 4px 8px; }
+.how summary { cursor: pointer; font-weight: 600; }
+.how p { font-size: .92rem; margin: 8px 0 0; }
+td .fine { display: block; margin: 0; white-space: normal; max-width: 18rem; }
+.move { display: block; white-space: normal; min-width: 14rem; max-width: 20rem; font-size: .85rem; }
