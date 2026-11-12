@@ -66,7 +66,7 @@ boot('Transactions', async (data) => {
     const v = T.tradeVerdict(tx);
     if (!v) return tx.sides.some(T.isScored) ? '<p class="verdict">Dead even.</p>' : '';
     const sw = Math.abs(v.winSwing);
-    return `<p class="verdict">${who(v.winner)} won this trade by <strong>${v.margin.toFixed(1)} pts</strong>${sw ? ` and ${sw} win${sw === 1 ? '' : 's'}` : ''}.</p>`;
+    return `<p class="verdict">${who(v.winner)} won this trade by <strong>${v.margin.toFixed(1)} pts</strong>${v.weeks ? ` (${v.marginPerWeek.toFixed(1)} a week over ${v.weeks} week${v.weeks === 1 ? '' : 's'})` : ''}${sw ? ` and ${sw} win${sw === 1 ? '' : 's'}` : ''}.</p>`;
   };
 
   const item = ({ tx, side, kind, others }) => {
@@ -116,7 +116,7 @@ boot('Transactions', async (data) => {
   const draw = () => {
     const qs = T.stateToQuery(st);
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
-    const summary = T.teamSummary(transactions, st.season)
+    const summary = T.teamSummary(transactions, st.season, st.rank)
       .filter((r) => st.manager === 'all' || r.manager === st.manager);
     const scope = st.season === 'all' ? 'All Sleeper seasons' : `${st.season} season`;
     root.innerHTML = `
@@ -129,15 +129,18 @@ boot('Transactions', async (data) => {
         <p><strong>Wins gained</strong> counts weeks where the result flips once that difference is taken away (in a trade with that
         week's opponent, from both teams). Who actually started is shown as context only. Draft picks and FAAB in trades aren't scored.
         Players on waivers are scored from their weekly stats.</p>
+        <p><strong>Points per week</strong> divides the points gained by the weeks scored, so a late-season trade that costs 10 a week stands out even though it had fewer weeks to add up. Use "Rank trades by" to rank best and worst trades that way; it skips trades with fewer than 3 weeks scored so one lucky week can't top the list.</p>
       </details>
       <section class="card">
         <h2>Trades by team</h2>
-        <p class="desc">${esc(scope)}. Pts and W are gained from best possible lineups in the weeks after each trade.</p>
+        <p class="desc">${esc(scope)}. Pts and W are gained from best possible lineups in the weeks after each trade; Pts/wk divides by the weeks scored.
+        Best and worst trade are ranked by ${st.rank === 'week' ? `points per week (trades with ${T.MIN_WEEKS_PER_WEEK_RANK}+ weeks scored)` : 'total points'}.</p>
         <div id="summary"></div>
       </section>
       <section class="card">
         <h2>Trades, most lopsided first</h2>
-        <p class="desc">Margin is the gap between the two teams' points gained. Tap a column to sort.</p>
+        <p class="desc">Margin is the gap between the two teams' points gained; Per wk divides it by the weeks scored.
+        ${st.rank === 'week' ? `Ranked per week, trades with ${T.MIN_WEEKS_PER_WEEK_RANK}+ weeks scored.` : 'Ranked by total.'} Tap a column to sort.</p>
         <div id="top-trades"></div>
       </section>
       <section class="card">
@@ -160,7 +163,7 @@ boot('Transactions', async (data) => {
       : it.pick ? `${it.pick.season} rd ${it.pick.round} pick` : `$${it.faab} FAAB`);
     const itemsText = (items) => items.map(itemText).join(', ') || 'nothing';
     const names = (s) => esc(s.adds.map((p) => players[p]?.name ?? p).join(', ') || 'nothing');
-    const pts = (m) => `<span class="${tone(m.side.pts)}">(${signed(m.side.pts)})</span>`;
+    const pts = (m) => `<span class="${tone(m.side.pts)}">(${signed(m.side.pts)}${m.side.n ? `, ${signed(T.perWeek(m.side))}/wk` : ''})</span>`;
     const moveText = (m) => (m ? `<span class="move">${m.tx.season} wk ${m.tx.week}: ${names(m.side)} ${pts(m)}</span>` : '—');
     const tradeText = (m) => {
       if (!m) return '—';
@@ -171,13 +174,15 @@ boot('Transactions', async (data) => {
     const managerCol = { key: 'manager', label: 'Team', format: (v) => `<a href="?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(T.stateToQuery(st))), m: v })}" data-m="${esc(v)}">${who(v)}</a>`, sort: (r) => data.name(r.manager) };
     const moveCol = (key, label, format = moveText) => ({ key, label, format, sort: (r) => r[key]?.side.pts ?? 0 });
     renderTable(document.getElementById('summary'), {
-      rows: summary.filter((r) => r.trades).sort((a, b) => b.tradePts - a.tradePts),
+      rows: summary.filter((r) => r.trades)
+        .sort((a, b) => (st.rank === 'week' ? b.tradePerWeek - a.tradePerWeek : b.tradePts - a.tradePts)),
       pageSize: 20,
       empty: 'No trades match these filters.',
       columns: [
         managerCol,
         { key: 'trades', label: 'Trades', num: true },
         ptsCol('tradePts', 'Trade pts'),
+        { ...ptsCol('tradePerWeek', 'Pts/wk'), format: (v) => `<span class="${tone(v)}">${signed(v, 2)}</span>` },
         winCol('tradeWins', 'Trade W'),
         moveCol('bestTrade', 'Best trade', tradeText),
         moveCol('worstTrade', 'Worst trade', tradeText),
@@ -200,6 +205,7 @@ boot('Transactions', async (data) => {
     renderTable(document.getElementById('top-trades'), {
       rows: T.topTrades(transactions, st).map(({ tx, v }) => ({
         season: tx.season, week: tx.week, winner: v.winner, loser: v.loser, margin: v.margin, swing: v.winSwing,
+        perWeek: v.marginPerWeek, weeks: v.weeks,
         wGot: itemsText(T.gotGave(v.sides[0], tx).got), lGot: itemsText(T.gotGave(v.sides[1], tx).got),
       })),
       pageSize: 10,
@@ -210,6 +216,7 @@ boot('Transactions', async (data) => {
         { key: 'winner', label: 'Won', format: (v, r) => `${who(v)} <span class="fine">got ${r.wGot}</span>`, sort: (r) => data.name(r.winner) },
         { key: 'loser', label: 'Lost', format: (v, r) => `${who(v)} <span class="fine">got ${r.lGot}</span>`, sort: (r) => data.name(r.loser) },
         { key: 'margin', label: 'Margin', num: true, format: (v) => v.toFixed(1) },
+        { key: 'perWeek', label: 'Per wk', num: true, format: (v, r) => `${v.toFixed(2)} <span class="fine-inline">${r.weeks} wk${r.weeks === 1 ? '' : 's'}</span>` },
         winCol('swing', 'Win swing'),
       ],
     });
@@ -238,6 +245,7 @@ boot('Transactions', async (data) => {
     form.m.innerHTML = opt('all', 'All managers', st.manager)
       + data.managers.map((m) => opt(m.manager_id, `${m.display_name}${m.active ? '' : ' (former)'}`, st.manager)).join('');
     form.season.innerHTML = opt('all', 'All Sleeper seasons', st.season) + seasons.map((s) => opt(s, s, st.season)).join('');
+    form.rank.innerHTML = Object.entries(T.RANKS).map(([k, label]) => opt(k, label, st.rank)).join('');
     for (const k of Object.keys(T.KINDS)) form.elements[`k-${k}`].checked = st.kinds.has(k);
   };
 
@@ -246,6 +254,7 @@ boot('Transactions', async (data) => {
     st = {
       manager: form.m.value,
       season: form.season.value === 'all' ? 'all' : Number(form.season.value),
+      rank: form.rank.value,
       kinds: new Set(kinds),
     };
     draw();

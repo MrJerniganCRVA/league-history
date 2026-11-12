@@ -76,6 +76,7 @@ class ScoreTest(unittest.TestCase):
         # wk2: with 10+20+15+12=57, without 10+9+18+15=52 -> +5; wk3: 75 vs 67 -> +8
         self.assertEqual(alice["weeks"], [[2, 5.0], [3, 8.0]])
         self.assertEqual(alice["pts"], 13.0)
+        self.assertEqual(alice["n"], 2)  # weeks scored, for points per week
         # Bob: 39 vs 41 both weeks
         self.assertEqual(bob["pts"], -4.0)
 

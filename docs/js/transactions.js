@@ -59,14 +59,30 @@ export function timeline(txs, f) {
 export const winsOf = (side) => (side.wins ?? 0) + (side.po_wins ?? 0);
 export const isScored = (side) => side.pts !== undefined;
 
-/** Per-manager counts, score totals and best/worst trade and pickup. season: number | 'all'. */
-export function teamSummary(txs, season) {
+/** Ranking a move by points per week needs a few weeks, or one lucky week dominates. */
+export const MIN_WEEKS_PER_WEEK_RANK = 3;
+export const RANKS = { total: 'Total points', week: 'Points per week' };
+
+/** Points gained per scored week (0 when no weeks were scored). */
+export const perWeek = (side) => (side.n ? side.pts / side.n : 0);
+
+/** Value used to rank a scored side; null when it can't be ranked that way. */
+export function rankValue(side, rank) {
+  if (rank !== 'week') return side.pts;
+  return (side.n ?? 0) >= MIN_WEEKS_PER_WEEK_RANK ? perWeek(side) : null;
+}
+
+/**
+ * Per-manager counts, score totals and best/worst trade and pickup. season: number | 'all'.
+ * rank picks best/worst by total points ('total') or points per week ('week', min 3 weeks).
+ */
+export function teamSummary(txs, season, rank = 'total') {
   const by = new Map();
   const row = (m) => {
     if (!by.has(m)) {
       by.set(m, {
         manager: m, trades: 0, pickups: 0, drops: 0, faab: 0, topBid: 0,
-        tradePts: 0, tradeWins: 0, pickupPts: 0, pickupWins: 0,
+        tradePts: 0, tradeWins: 0, tradeWeeks: 0, pickupPts: 0, pickupWins: 0, pickupWeeks: 0,
         bestTrade: null, worstTrade: null, bestPickup: null, worstPickup: null,
       });
     }
@@ -88,15 +104,19 @@ export function teamSummary(txs, season) {
         const k = kind === 'trade' ? 'trade' : 'pickup';
         r[`${k}Pts`] += side.pts;
         r[`${k}Wins`] += winsOf(side);
-        const move = { tx, side, kind };
+        r[`${k}Weeks`] += side.n ?? 0;
+        const v = rankValue(side, rank);
+        if (v === null) continue;
+        const move = { tx, side, kind, v };
         const K = k === 'trade' ? 'Trade' : 'Pickup';
-        if (!r[`best${K}`] || side.pts > r[`best${K}`].side.pts) r[`best${K}`] = move;
-        if (!r[`worst${K}`] || side.pts < r[`worst${K}`].side.pts) r[`worst${K}`] = move;
+        if (!r[`best${K}`] || v > r[`best${K}`].v) r[`best${K}`] = move;
+        if (!r[`worst${K}`] || v < r[`worst${K}`].v) r[`worst${K}`] = move;
       }
     }
   }
   for (const r of by.values()) {
     for (const k of ['tradePts', 'pickupPts']) r[k] = Math.round(r[k] * 100) / 100;
+    r.tradePerWeek = r.tradeWeeks ? Math.round((r.tradePts / r.tradeWeeks) * 100) / 100 : 0;
   }
   return [...by.values()];
 }
@@ -108,7 +128,10 @@ export function tradeVerdict(tx) {
   const [a, b] = [...scored].sort((x, y) => y.pts - x.pts);
   const margin = Math.round((a.pts - b.pts) * 100) / 100;
   if (margin === 0) return null;
-  return { winner: a.manager, loser: b.manager, margin, winSwing: winsOf(a) - winsOf(b), sides: [a, b] };
+  // both teams are scored over (nearly) the same weeks; use the longer so a playoff bye can't inflate it
+  const weeks = Math.max(a.n ?? 0, b.n ?? 0);
+  const marginPerWeek = weeks ? Math.round((margin / weeks) * 100) / 100 : 0;
+  return { winner: a.manager, loser: b.manager, margin, marginPerWeek, weeks, winSwing: winsOf(a) - winsOf(b), sides: [a, b] };
 }
 
 /** Rows for the "top moves" tables, filtered like the page. */
@@ -116,8 +139,8 @@ export function topTrades(txs, f) {
   return txs.filter((tx) => (f.season === 'all' || tx.season === f.season)
     && (f.manager === 'all' || tx.sides.some((s) => s.manager === f.manager)))
     .map((tx) => ({ tx, v: tradeVerdict(tx) }))
-    .filter((r) => r.v)
-    .sort((a, b) => b.v.margin - a.v.margin);
+    .filter((r) => r.v && (f.rank !== 'week' || r.v.weeks >= MIN_WEEKS_PER_WEEK_RANK))
+    .sort((a, b) => (f.rank === 'week' ? b.v.marginPerWeek - a.v.marginPerWeek : b.v.margin - a.v.margin));
 }
 
 export function topPickups(txs, f) {
@@ -146,6 +169,7 @@ export function readState(search, { managers, seasons }) {
     manager: managers.includes(m) ? m : 'all',
     season: seasons.includes(s) ? s : 'all',
     kinds: new Set(kinds.length ? kinds : Object.keys(KINDS)),
+    rank: q.get('rank') === 'week' ? 'week' : 'total',
   };
 }
 
@@ -154,5 +178,6 @@ export function stateToQuery(st) {
   if (st.manager !== 'all') q.set('m', st.manager);
   if (st.season !== 'all') q.set('season', st.season);
   if (st.kinds.size !== Object.keys(KINDS).length) q.set('kinds', [...st.kinds].join(','));
+  if (st.rank === 'week') q.set('rank', 'week');
   return q.toString();
 }
