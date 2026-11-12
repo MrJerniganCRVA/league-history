@@ -131,14 +131,19 @@ boot('Transactions', async (data) => {
         Players on waivers are scored from their weekly stats.</p>
       </details>
       <section class="card">
-        <h2>Team summary</h2>
-        <p class="desc">${esc(scope)}. Pickups count players added; FAAB is winning waiver bids only. Pts and W are gained from best possible lineups.</p>
+        <h2>Trades by team</h2>
+        <p class="desc">${esc(scope)}. Pts and W are gained from best possible lineups in the weeks after each trade.</p>
         <div id="summary"></div>
       </section>
       <section class="card">
         <h2>Trades, most lopsided first</h2>
         <p class="desc">Margin is the gap between the two teams' points gained. Tap a column to sort.</p>
         <div id="top-trades"></div>
+      </section>
+      <section class="card">
+        <h2>Pickups by team</h2>
+        <p class="desc">${esc(scope)}. Pickups count players added; FAAB is winning waiver bids only.</p>
+        <div id="pickup-summary"></div>
       </section>
       <section class="card">
         <h2>Pickups, best first</h2>
@@ -152,23 +157,34 @@ boot('Transactions', async (data) => {
     const ptsCol = (key, label) => ({ key, label, num: true, format: (v) => `<span class="${tone(v)}">${signed(v)}</span>` });
     const winCol = (key, label) => ({ key, label, num: true, format: (v) => `<span class="${tone(v)}">${signed(v, v % 1 ? 1 : 0)}</span>` });
     const names = (s) => esc(s.adds.map((p) => players[p]?.name ?? p).join(', ') || 'picks/FAAB');
-    const moveText = (m) => (m ? `<span class="move">${m.kind === 'trade' ? 'Trade' : 'Pickup'} ${m.tx.season} wk ${m.tx.week}: ${names(m.side)} <span class="${tone(m.side.pts)}">(${signed(m.side.pts)})</span></span>` : '—');
+    const moveText = (m) => (m ? `<span class="move">${m.tx.season} wk ${m.tx.week}: ${names(m.side)} <span class="${tone(m.side.pts)}">(${signed(m.side.pts)})</span></span>` : '—');
+    const managerCol = { key: 'manager', label: 'Team', format: (v) => `<a href="?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(T.stateToQuery(st))), m: v })}" data-m="${esc(v)}">${who(v)}</a>`, sort: (r) => data.name(r.manager) };
+    const moveCol = (key, label) => ({ key, label, format: moveText, sort: (r) => r[key]?.side.pts ?? 0 });
     renderTable(document.getElementById('summary'), {
-      rows: summary,
+      rows: summary.filter((r) => r.trades).sort((a, b) => b.tradePts - a.tradePts),
       pageSize: 20,
-      empty: 'No transactions match these filters.',
+      empty: 'No trades match these filters.',
       columns: [
-        { key: 'manager', label: 'Manager', format: (v) => `<a href="?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(T.stateToQuery(st))), m: v })}" data-m="${esc(v)}">${who(v)}</a>`, sort: (r) => data.name(r.manager) },
+        managerCol,
         { key: 'trades', label: 'Trades', num: true },
         ptsCol('tradePts', 'Trade pts'),
         winCol('tradeWins', 'Trade W'),
+        moveCol('bestTrade', 'Best trade'),
+        moveCol('worstTrade', 'Worst trade'),
+      ],
+    });
+    renderTable(document.getElementById('pickup-summary'), {
+      rows: summary.filter((r) => r.pickups || r.drops).sort((a, b) => b.pickupPts - a.pickupPts),
+      pageSize: 20,
+      empty: 'No pickups match these filters.',
+      columns: [
+        managerCol,
         { key: 'pickups', label: 'Pickups', num: true },
         ptsCol('pickupPts', 'Pickup pts'),
         winCol('pickupWins', 'Pickup W'),
         { key: 'drops', label: 'Drops', num: true },
         { key: 'faab', label: 'FAAB', num: true, format: (v) => `$${v}` },
-        { key: 'best', label: 'Best move', format: moveText, sort: (r) => r.best?.side.pts ?? 0 },
-        { key: 'worst', label: 'Worst move', format: moveText, sort: (r) => r.worst?.side.pts ?? 0 },
+        moveCol('bestPickup', 'Best pickup'),
       ],
     });
     renderTable(document.getElementById('top-trades'), {

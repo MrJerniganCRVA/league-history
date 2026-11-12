@@ -70,11 +70,13 @@ test('tradeVerdict: winner by points, swing counts playoff wins', () => {
   assert.equal(T.tradeVerdict(TXS[1]), null); // unscored
 });
 
-test('teamSummary totals scores and finds best/worst move', () => {
+test('teamSummary totals scores and finds best/worst trade and pickup', () => {
   const a = T.teamSummary(SCORED, 'all').find((r) => r.manager === 'A');
   assert.deepEqual([a.tradePts, a.tradeWins, a.pickupPts, a.pickupWins], [11, 1, 18, 0]);
-  assert.equal(a.best.tx.id, 'w1');
-  assert.equal(a.worst.tx.id, 't2');
+  assert.deepEqual([a.bestTrade.tx.id, a.worstTrade.tx.id], ['t1', 't2']);
+  assert.deepEqual([a.bestPickup.tx.id, a.worstPickup.tx.id], ['w1', 'w1']);
+  const b = T.teamSummary(SCORED, 'all').find((r) => r.manager === 'B');
+  assert.deepEqual([b.bestTrade.tx.id, b.worstPickup.tx.id], ['t1', 'w2']);
 });
 
 test('topTrades and topPickups follow the filters', () => {
