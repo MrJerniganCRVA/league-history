@@ -42,14 +42,15 @@ export function timeline(txs, f) {
 export const winsOf = (side) => (side.wins ?? 0) + (side.po_wins ?? 0);
 export const isScored = (side) => side.pts !== undefined;
 
-/** Per-manager counts and score totals for the summary table. season: number | 'all'. */
+/** Per-manager counts, score totals and best/worst trade and pickup. season: number | 'all'. */
 export function teamSummary(txs, season) {
   const by = new Map();
   const row = (m) => {
     if (!by.has(m)) {
       by.set(m, {
         manager: m, trades: 0, pickups: 0, drops: 0, faab: 0, topBid: 0,
-        tradePts: 0, tradeWins: 0, pickupPts: 0, pickupWins: 0, best: null, worst: null,
+        tradePts: 0, tradeWins: 0, pickupPts: 0, pickupWins: 0,
+        bestTrade: null, worstTrade: null, bestPickup: null, worstPickup: null,
       });
     }
     return by.get(m);
@@ -71,8 +72,9 @@ export function teamSummary(txs, season) {
         r[`${k}Pts`] += side.pts;
         r[`${k}Wins`] += winsOf(side);
         const move = { tx, side, kind };
-        if (!r.best || side.pts > r.best.side.pts) r.best = move;
-        if (!r.worst || side.pts < r.worst.side.pts) r.worst = move;
+        const K = k === 'trade' ? 'Trade' : 'Pickup';
+        if (!r[`best${K}`] || side.pts > r[`best${K}`].side.pts) r[`best${K}`] = move;
+        if (!r[`worst${K}`] || side.pts < r[`worst${K}`].side.pts) r[`worst${K}`] = move;
       }
     }
   }
