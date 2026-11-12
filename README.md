@@ -44,11 +44,22 @@ To correct any of them, add `{"2023": "manager_id"}` to `champion_overrides`, `s
 
 ```bash
 python scripts/sleeper_fetch.py     # cache Sleeper responses in data_raw/sleeper/ (only the current season is re-fetched)
+                                    # --skip-stats: don't fetch weekly player stats
 python scripts/build_games.py       # write docs/data/{games,seasons,managers}.json and print the sanity report
 ```
 
 The report lists games and managers per season, unmapped identities, missing weeks and missing champions.
 Unmapped people's games are kept, never dropped.
+
+**Transactions data** (for the upcoming Transactions page) is cached next to the matchups:
+`<season>/transactions/NN.json` (completed trades, waiver claims and free-agent moves; failed claims are
+dropped because they never happened), `<season>/stats/NN.json` (weekly stats trimmed to the league's scoring
+keys, used to score players while they sit on waivers) and `players.json` (names and positions).
+Seasons cached before this existed are back-filled once on the next run. The stats endpoint isn't in
+Sleeper's official docs; if it fails, the fetch prints a warning and carries on.
+
+> **TODO (Yahoo):** transactions for 2016–2020 aren't imported yet. Add them to `yahoo_export.py` once Yahoo
+> API access is approved.
 
 **Automatic refresh:** `.github/workflows/refresh.yml` runs every Tuesday from September to January
 (and on demand from the Actions tab). It fetches the current Sleeper season, rebuilds, and commits only if
