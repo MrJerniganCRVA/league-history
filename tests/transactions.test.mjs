@@ -54,3 +54,33 @@ test('state round-trips through the URL and ignores junk', () => {
   assert.deepEqual([junk.manager, junk.season, junk.kinds.size], ['all', 'all', 3]);
   assert.equal(T.stateToQuery(junk), '');
 });
+
+const SCORED = [
+  tx('t1', 2024, 1, 'trade', [side('A', ['p1'], ['p2'], { pts: 13, wins: 1, po_wins: 0 }), side('B', ['p2'], ['p1'], { pts: -4, wins: -1, po_wins: 0 })]),
+  tx('t2', 2025, 2, 'trade', [side('A', ['p3'], ['p4'], { pts: -2, wins: 0, po_wins: 0 }), side('C', ['p4'], ['p3'], { pts: 30, wins: 1, po_wins: 1 })]),
+  tx('w1', 2025, 3, 'waiver', [side('A', ['p5'], ['p6'], { bid: 3, pts: 18, wins: 0, po_wins: 0 })]),
+  tx('w2', 2025, 4, 'free_agent', [side('B', ['p7'], [], { pts: -5, wins: 0, po_wins: 0 })]),
+  tx('d1', 2025, 5, 'free_agent', [side('B', [], ['p7'])]),
+];
+
+test('tradeVerdict: winner by points, swing counts playoff wins', () => {
+  const v = T.tradeVerdict(SCORED[1]);
+  assert.deepEqual([v.winner, v.loser, v.margin, v.winSwing], ['C', 'A', 32, 2]);
+  assert.equal(T.tradeVerdict(SCORED[2]), null);
+  assert.equal(T.tradeVerdict(TXS[1]), null); // unscored
+});
+
+test('teamSummary totals scores and finds best/worst move', () => {
+  const a = T.teamSummary(SCORED, 'all').find((r) => r.manager === 'A');
+  assert.deepEqual([a.tradePts, a.tradeWins, a.pickupPts, a.pickupWins], [11, 1, 18, 0]);
+  assert.equal(a.best.tx.id, 'w1');
+  assert.equal(a.worst.tx.id, 't2');
+});
+
+test('topTrades and topPickups follow the filters', () => {
+  const f = { manager: 'all', season: 'all', kinds: all };
+  assert.deepEqual(T.topTrades(SCORED, f).map((r) => r.tx.id), ['t2', 't1']);
+  assert.deepEqual(T.topTrades(SCORED, { ...f, manager: 'B' }).map((r) => r.tx.id), ['t1']);
+  assert.deepEqual(T.topPickups(SCORED, f).map((r) => r.tx.id), ['w1', 'w2']);
+  assert.deepEqual(T.topPickups(SCORED, { ...f, season: 2024 }), []);
+});
