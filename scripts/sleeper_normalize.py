@@ -19,6 +19,19 @@ def _roster_owners(rosters: list[dict], issues: list[str]) -> dict[int, str | No
     return owners
 
 
+def roster_manager(users: list[dict], rosters: list[dict], resolver: Resolver,
+                   issues: list[str]):
+    """Function roster_id -> manager_id for one season (shared by games and transactions)."""
+    names = {u["user_id"]: (u.get("display_name") or (u.get("metadata") or {}).get("team_name") or "")
+             for u in users}
+    owners = _roster_owners(rosters, issues)
+
+    def who(roster_id: int) -> str:
+        uid = owners.get(int(roster_id))
+        return resolver.sleeper_user(uid, names.get(uid, ""))
+    return who
+
+
 def _score(entry: dict) -> float:
     cp = entry.get("custom_points")
     return float(cp if cp is not None else (entry.get("points") or 0))
@@ -78,13 +91,7 @@ def normalize_sleeper_season(season_dir: Path, resolver: Resolver) -> tuple[list
     scored_through = None if complete else int(settings.get("last_scored_leg") or 0)
     issues: list[str] = []
 
-    names = {u["user_id"]: (u.get("display_name") or (u.get("metadata") or {}).get("team_name") or "")
-             for u in users}
-    owners = _roster_owners(rosters, issues)
-
-    def who(roster_id: int) -> str:
-        uid = owners.get(roster_id)
-        return resolver.sleeper_user(uid, names.get(uid, ""))
+    who = roster_manager(users, rosters, resolver, issues)
 
     playoff_pairs = _playoff_pairs(league, wb)
     games: list[dict] = []

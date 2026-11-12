@@ -15,6 +15,7 @@ it only reads the JSON in `docs/data/`, which the Python scripts in `/scripts` g
 | `index.html` | Champion, Sacko and regular-season last place by year, 3 random "did you know" facts |
 | `records.html` | Highest/lowest scores (all-time, by season, by manager), blowouts, closest games, highest score in a loss, lowest in a win, weekly-low counts, season points for/against |
 | `h2h.html` | Everyone's record against everyone; tap a cell for the rivalry |
+| `transactions.html?m=<id>&season=<year>` | Sleeper trades, pickups and drops: team summary (trades, pickups, drops, FAAB) and a week-by-week timeline, for one season or all Sleeper seasons. Trade and pickup scores are coming next. |
 | `rivalry.html?a=<id>&b=<id>` | Series record, playoff record, points, average margin, biggest wins, streak, full game log |
 
 Every page shares the same filters (season range, platform, game type), which are kept in the URL,
@@ -51,7 +52,7 @@ python scripts/build_games.py       # write docs/data/{games,seasons,managers}.j
 The report lists games and managers per season, unmapped identities, missing weeks and missing champions.
 Unmapped people's games are kept, never dropped.
 
-**Transactions data** (for the upcoming Transactions page) is cached next to the matchups:
+**Transactions data** (for the Transactions page, written to `docs/data/transactions.json` by the build) is cached next to the matchups:
 `<season>/transactions/NN.json` (completed trades, waiver claims and free-agent moves; failed claims are
 dropped because they never happened), `<season>/stats/NN.json` (weekly stats trimmed to the league's scoring
 keys, used to score players while they sit on waivers) and `players.json` (names and positions).

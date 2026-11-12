@@ -15,6 +15,7 @@ from common import (SITE_DATA, SLEEPER_RAW, UNMAPPED_PREFIX, YAHOO_RAW, Resolver
                     make_game, read_json, write_json)
 from sanity_report import print_report
 from sleeper_normalize import normalize_sleeper_season
+from sleeper_transactions import normalize_sleeper_transactions, player_table
 
 
 class BuildError(RuntimeError):
@@ -150,6 +151,26 @@ def build(cfg: dict, resolver: Resolver, sleeper_dir: Path = SLEEPER_RAW,
     return games, seasons, issues
 
 
+def write_transactions(resolver: Resolver, sleeper_dir: Path = SLEEPER_RAW,
+                       out: Path = SITE_DATA / "transactions.json") -> int:
+    """Sleeper only for now. TODO: Yahoo transactions once the Yahoo export can pull them."""
+    txs: list[dict] = []
+    for d in sorted(p for p in sleeper_dir.glob("*") if (p / "transactions").is_dir()):
+        t, issues = normalize_sleeper_transactions(d, resolver)
+        txs += t
+        for i in issues:
+            print(f"  transactions {d.name}: {i}")
+    players = player_table(txs, sleeper_dir / "players.json")
+    # one transaction per line, like games.json: small diffs on the weekly refresh
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        '{"players": ' + json.dumps(players, ensure_ascii=False, separators=(",", ":"))
+        + ',\n"transactions": [\n'
+        + ",\n".join(json.dumps(t, ensure_ascii=False, separators=(",", ":")) for t in txs)
+        + "\n]}\n", encoding="utf-8")
+    return len(txs)
+
+
 def main() -> int:
     cfg = load_config()
     resolver = Resolver()
@@ -179,8 +200,10 @@ def main() -> int:
         "seasons": public_seasons,
     })
     write_json(SITE_DATA / "managers.json", managers)
+    txs = write_transactions(resolver)
     print_report(games, seasons, issues, resolver.unmapped)
-    print(f"Wrote {len(games)} games, {len(seasons)} seasons, {len(managers)} managers to docs/data/")
+    print(f"Wrote {len(games)} games, {len(seasons)} seasons, {len(managers)} managers, "
+          f"{txs} transactions to docs/data/")
     return 0
 
 

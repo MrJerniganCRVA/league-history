@@ -92,7 +92,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
 }
 .tile strong { display: block; color: var(--accent); font-size: 1.05rem; }
 .tile span { color: var(--muted); font-size: .92rem; }
-@media (min-width: 700px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .tiles { grid-template-columns: repeat(4, 1fr); } }
 table.champs th[scope="row"] { font-variant-numeric: tabular-nums; }
 /* phones: each season becomes a small labelled block instead of a wide row */
 @media (max-width: 599px) {
@@ -184,3 +185,32 @@ td.none { color: var(--muted); padding: 8px 6px; }
 .facts-grid dd { margin: 2px 0 0; }
 .when { color: var(--muted); font-size: .9em; }
 @media (min-width: 700px) { .facts-grid { grid-template-columns: 1fr 1fr; } }
+
+/* transactions */
+.filters .kinds { border: 0; margin: 0; padding: 0; display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: center; min-height: 36px; }
+.filters .kinds legend { font-size: .75rem; color: var(--muted); padding: 0; float: left; width: 100%; }
+.filters .kinds label { flex-direction: row; align-items: center; gap: 4px; font-size: .95rem; color: var(--text); }
+.tl-season { font-size: 1.05rem; margin: 18px 0 4px; padding-bottom: 4px; border-bottom: 2px solid var(--line); }
+.tl-season:first-child { margin-top: 4px; }
+.tl-week { display: grid; grid-template-columns: 4.5rem 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.tl-wk { font-size: .8rem; color: var(--muted); font-weight: 600; padding-top: 3px; }
+.tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tx { font-size: .92rem; }
+.tx .when { font-variant-numeric: tabular-nums; }
+.tx-who { font-weight: 600; }
+.moves { list-style: none; margin: 2px 0 0; padding: 0; }
+.moves li { display: flex; gap: 6px; align-items: baseline; }
+.moves .sign { font-weight: 700; width: 1ch; flex: none; }
+.moves .add .sign { color: rgb(var(--win)); }
+.moves .drop .sign { color: rgb(var(--loss)); }
+.moves .drop { color: var(--muted); }
+.pos { color: var(--muted); font-size: .8rem; }
+.bid { font-weight: 700; font-variant-numeric: tabular-nums; }
+.badge.k-trade { background: var(--accent); color: var(--accent-ink); }
+.badge.k-pickup { background: rgba(var(--win), .18); color: var(--text); }
+.badge.k-drop { background: rgba(var(--loss), .16); color: var(--text); }
+.trade { display: grid; grid-template-columns: 1fr; gap: 6px 16px; margin-top: 4px; }
+@media (min-width: 600px) { .trade { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); } }
+.trade-side { background: var(--surface-2); border-radius: 8px; padding: 6px 10px; }
+.trade-who { font-weight: 600; font-size: .85rem; }
+@media (max-width: 499px) { .tl-week { grid-template-columns: 1fr; gap: 2px; } }
