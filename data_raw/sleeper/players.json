@@ -521,6 +521,16 @@
       ],
       "team": "ARI"
     },
+    "11593": {
+      "full_name": "Brevyn Spann-Ford",
+      "first_name": "Brevyn",
+      "last_name": "Spann-Ford",
+      "position": "TE",
+      "fantasy_positions": [
+        "TE"
+      ],
+      "team": "DAL"
+    },
     "11596": {
       "full_name": "Ben Sinnott",
       "first_name": "Ben",
@@ -808,7 +818,7 @@
       "fantasy_positions": [
         "WR"
       ],
-      "team": "KC"
+      "team": "ARI"
     },
     "11783": {
       "full_name": "Ryan Flournoy",
@@ -962,7 +972,8 @@
       "position": "RB",
       "fantasy_positions": [
         "RB"
-      ]
+      ],
+      "team": "PHI"
     },
     "12469": {
       "full_name": "Dylan Sampson",
@@ -1133,6 +1144,16 @@
         "WR"
       ],
       "team": "GB"
+    },
+    "12502": {
+      "full_name": "Gunnar Helm",
+      "first_name": "Gunnar",
+      "last_name": "Helm",
+      "position": "TE",
+      "fantasy_positions": [
+        "TE"
+      ],
+      "team": "TEN"
     },
     "12504": {
       "full_name": "Kaleb Johnson",
@@ -2017,8 +2038,7 @@
       "position": "WR",
       "fantasy_positions": [
         "WR"
-      ],
-      "team": "SF"
+      ]
     },
     "2214": {
       "full_name": "Cameron Brate",
@@ -3052,8 +3072,7 @@
       "position": "K",
       "fantasy_positions": [
         "K"
-      ],
-      "team": "MIA"
+      ]
     },
     "4234": {
       "full_name": "Noah Brown",
@@ -3165,7 +3184,8 @@
       "position": "QB",
       "fantasy_positions": [
         "QB"
-      ]
+      ],
+      "team": "TB"
     },
     "4602": {
       "full_name": "Robert Tonyan",
@@ -3542,7 +3562,8 @@
       "position": "K",
       "fantasy_positions": [
         "K"
-      ]
+      ],
+      "team": "MIA"
     },
     "5110": {
       "full_name": "Russell Gage",
@@ -3857,8 +3878,7 @@
       "position": "WR",
       "fantasy_positions": [
         "WR"
-      ],
-      "team": "PHI"
+      ]
     },
     "5849": {
       "full_name": "Kyler Murray",
@@ -3907,8 +3927,7 @@
       "position": "QB",
       "fantasy_positions": [
         "QB"
-      ],
-      "team": "IND"
+      ]
     },
     "5872": {
       "full_name": "Deebo Samuel Sr.",
@@ -4118,7 +4137,8 @@
       "position": "QB",
       "fantasy_positions": [
         "QB"
-      ]
+      ],
+      "team": "LV"
     },
     "6039": {
       "full_name": "Ty Johnson",
@@ -4277,6 +4297,16 @@
       "fantasy_positions": [
         "WR"
       ]
+    },
+    "6427": {
+      "full_name": "Ashton Dulin",
+      "first_name": "Ashton",
+      "last_name": "Dulin",
+      "position": "WR",
+      "fantasy_positions": [
+        "WR"
+      ],
+      "team": "IND"
     },
     "650": {
       "full_name": "Nick Folk",
@@ -4450,8 +4480,7 @@
       "position": "WR",
       "fantasy_positions": [
         "WR"
-      ],
-      "team": "SF"
+      ]
     },
     "6804": {
       "full_name": "Jordan Love",
@@ -4575,7 +4604,8 @@
       "position": "TE",
       "fantasy_positions": [
         "TE"
-      ]
+      ],
+      "team": "IND"
     },
     "6853": {
       "full_name": "Van Jefferson",
@@ -4651,8 +4681,7 @@
       "position": "WR",
       "fantasy_positions": [
         "WR"
-      ],
-      "team": "PIT"
+      ]
     },
     "6927": {
       "full_name": "Quez Watkins",
